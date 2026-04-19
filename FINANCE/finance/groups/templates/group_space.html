@@ -1,0 +1,633 @@
+{% extends "base.html" %}
+
+{% block title %}{{ group.name }} - Group Space - ISECO{% endblock %}
+{% block page_heading %}{{ group.name }} - Group Space{% endblock %}
+{% block page_subtitle %}Chat with group members and split expenses intelligently.{% endblock %}
+
+{% block content %}
+<div class="group-space-container">
+    <!-- Chat Section (Left) -->
+    <div class="chat-section">
+        <h3>💬 Group Chat</h3>
+
+        <div class="message-history" id="messageHistory">
+            {% for msg in messages %}
+            <div class="message-item">
+                <div class="message-header">
+                    <span class="sender-name">{{ msg.sender.username }}</span>
+                    <span class="message-time">{{ msg.created_at|date:"H:i" }}</span>
+                </div>
+                <p class="message-text">{{ msg.message }}</p>
+            </div>
+            {% empty %}
+            <div class="empty-state">No messages yet. Start the conversation!</div>
+            {% endfor %}
+        </div>
+
+        <form class="message-input-form" onsubmit="sendMessage(event)">
+            <div class="message-input-wrapper">
+                <input type="text" id="messageInput" class="message-input" placeholder="Type a message..." required>
+                <button type="submit" class="send-btn">Send</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Split Section (Right) -->
+    <div class="split-section">
+        <h3>💰 Expense Split</h3>
+
+        <!-- Add Expense Form -->
+        <div class="expense-input-card">
+            <h4>Create an Expense</h4>
+            <div class="form-group">
+                <label class="form-label">Description</label>
+                <input type="text" id="expenseDesc" class="form-input" placeholder="e.g., Trip to Goa, Dinner">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Total Amount (₹)</label>
+                <input type="number" id="expenseAmount" class="form-input" placeholder="0.00" step="0.01" min="0">
+            </div>
+            <button class="action-btn action-purple" onclick="addExpense()">Create Expense</button>
+        </div>
+
+        <!-- Split Suggestions Section -->
+        <div class="split-table-wrapper" id="splitTableWrapper" style="display: none;">
+            <h4>💡 AI-Powered Split Suggestions</h4>
+            <p class="split-info">Based on each member's financial situation, savings goals, and spending patterns.</p>
+
+            <div id="loadingState" style="display: none; text-align: center; padding: 24px; color: rgba(255,255,255,0.6);">
+                <div class="spinner"></div>
+                Analyzing financial data and generating suggestions...
+            </div>
+
+            <table class="split-table" id="splitTable" style="display: none;">
+                <thead>
+                    <tr>
+                        <th>Member</th>
+                        <th>Suggested</th>
+                        <th>Your Amount</th>
+                        <th>Rationale</th>
+                    </tr>
+                </thead>
+                <tbody id="splitTableBody">
+                </tbody>
+            </table>
+
+            <div class="split-footer">
+                <div class="total-row">
+                    <strong>Total:</strong>
+                    <strong id="totalAmount">₹0.00</strong>
+                </div>
+            </div>
+
+            <div class="split-actions">
+                <button class="action-btn action-outline" onclick="regenerateSuggestions()">🔄 Regenerate</button>
+                <button class="action-btn action-blue" onclick="finalizeSplit()">✓ Finalize Split</button>
+            </div>
+        </div>
+
+        <!-- Empty State -->
+        <div class="empty-state" id="emptyState">
+            No active expense splits. Create an expense to get started!
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_head %}
+<style>
+    .group-space-container {
+        display: grid;
+        grid-template-columns: 40% 60%;
+        gap: 24px;
+        height: calc(100vh - 200px);
+        margin-bottom: 24px;
+    }
+
+    @media (max-width: 1200px) {
+        .group-space-container {
+            grid-template-columns: 1fr;
+            height: auto;
+        }
+    }
+
+    /* Chat Section */
+    .chat-section {
+        display: flex;
+        flex-direction: column;
+        background: var(--surface-strong);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 22px;
+        padding: 24px;
+        gap: 16px;
+    }
+
+    .chat-section h3 {
+        margin: 0 0 12px 0;
+        font-size: 1rem;
+        font-weight: 700;
+    }
+
+    .message-history {
+        flex: 1;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        padding-right: 8px;
+        max-height: 500px;
+    }
+
+    .message-history::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    .message-history::-webkit-scrollbar-track {
+        background: rgba(255,255,255,0.03);
+        border-radius: 10px;
+    }
+
+    .message-history::-webkit-scrollbar-thumb {
+        background: rgba(255,255,255,0.15);
+        border-radius: 10px;
+    }
+
+    .message-item {
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.06);
+        border-radius: 14px;
+        padding: 12px 14px;
+        word-break: break-word;
+    }
+
+    .message-header {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 8px;
+        font-size: 0.85rem;
+    }
+
+    .sender-name {
+        font-weight: 600;
+        color: var(--accent);
+    }
+
+    .message-time {
+        color: rgba(255,255,255,0.4);
+        font-size: 0.75rem;
+    }
+
+    .message-text {
+        margin: 0;
+        font-size: 0.9rem;
+        line-height: 1.4;
+        color: rgba(255,255,255,0.9);
+    }
+
+    .message-input-form {
+        display: flex;
+        gap: 8px;
+    }
+
+    .message-input-wrapper {
+        display: flex;
+        gap: 8px;
+        width: 100%;
+    }
+
+    .message-input {
+        flex: 1;
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 12px;
+        padding: 10px 14px;
+        color: var(--text);
+        font-size: 0.9rem;
+    }
+
+    .message-input:focus {
+        outline: none;
+        border-color: var(--accent);
+        background: rgba(255,255,255,0.05);
+    }
+
+    .send-btn {
+        background: var(--accent);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        padding: 10px 20px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .send-btn:hover {
+        filter: brightness(1.1);
+        transform: translateY(-1px);
+    }
+
+    /* Split Section */
+    .split-section {
+        background: var(--surface-strong);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 22px;
+        padding: 24px;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        overflow-y: auto;
+        max-height: calc(100vh - 200px);
+    }
+
+    .split-section h3 {
+        margin: 0 0 12px 0;
+        font-size: 1rem;
+        font-weight: 700;
+    }
+
+    .split-section h4 {
+        margin: 0 0 8px 0;
+        font-size: 0.95rem;
+        font-weight: 600;
+    }
+
+    .expense-input-card {
+        background: rgba(255,255,255,0.02);
+        border: 1px solid rgba(255,255,255,0.06);
+        border-radius: 14px;
+        padding: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .expense-input-card h4 {
+        margin-top: 0;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .form-label {
+        font-size: 0.85rem;
+        font-weight: 600;
+        color: rgba(255,255,255,0.8);
+    }
+
+    .form-input {
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 10px;
+        padding: 10px 12px;
+        color: var(--text);
+        font-size: 0.9rem;
+    }
+
+    .form-input:focus {
+        outline: none;
+        border-color: var(--accent);
+        background: rgba(255,255,255,0.06);
+    }
+
+    .split-info {
+        font-size: 0.85rem;
+        color: rgba(255,255,255,0.6);
+        margin: 0 0 12px 0;
+    }
+
+    .split-table-wrapper {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .split-table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 0.85rem;
+    }
+
+    .split-table thead {
+        background: rgba(255,255,255,0.04);
+        border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .split-table th {
+        padding: 12px 10px;
+        text-align: left;
+        font-weight: 600;
+        color: rgba(255,255,255,0.8);
+    }
+
+    .split-table td {
+        padding: 12px 10px;
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .split-table tbody tr:hover {
+        background: rgba(255,255,255,0.03);
+    }
+
+    .member-name {
+        font-weight: 600;
+        color: var(--accent);
+    }
+
+    .amount-display {
+        font-weight: 600;
+        color: var(--success);
+    }
+
+    .amount-input {
+        background: rgba(255,255,255,0.04);
+        border: 1px solid rgba(255,255,255,0.1);
+        border-radius: 6px;
+        padding: 6px 8px;
+        color: var(--text);
+        font-size: 0.85rem;
+        width: 100%;
+        max-width: 100px;
+    }
+
+    .amount-input:focus {
+        outline: none;
+        border-color: var(--accent);
+    }
+
+    .rationale {
+        font-size: 0.8rem;
+        color: rgba(255,255,255,0.6);
+        max-width: 200px;
+        overflow-wrap: break-word;
+    }
+
+    .split-footer {
+        background: rgba(255,255,255,0.02);
+        border-top: 1px solid rgba(255,255,255,0.1);
+        padding-top: 12px;
+        border-radius: 10px;
+    }
+
+    .total-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 12px;
+        font-weight: 600;
+        font-size: 0.95rem;
+    }
+
+    .split-actions {
+        display: flex;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .spinner {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        border: 3px solid rgba(255,255,255,0.2);
+        border-top-color: var(--accent);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 24px;
+        color: rgba(255,255,255,0.5);
+        background: rgba(255,255,255,0.02);
+        border: 1px dashed rgba(255,255,255,0.1);
+        border-radius: 14px;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const groupId = {{ group.id }};
+const currentUserId = {{ current_user.id|default:"null" }};
+let currentExpenseId = null;
+let currentExpenseAmount = null;
+let currentSplits = {};
+
+if (currentUserId === null || currentUserId === 'null') {
+    document.body.innerHTML = '<div style="padding: 40px; text-align: center; color: #999;"><h2>Authentication Required</h2><p>Please log in to access this group space.</p></div>';
+    throw new Error('User not authenticated');
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+function escapeHtml(text) {
+    const map = {
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;'
+    };
+    return text.replace(/[&<>"']/g, m => map[m]);
+}
+
+function fetchMessages() {
+    console.log('[CHAT] Fetching messages for group', groupId);
+    fetch(`/groups/api/messages/?group_id=${groupId}&limit=50`)
+        .then(r => r.json())
+        .then(data => {
+            if (data.messages && data.messages.length > 0) {
+                console.log('[CHAT] Got', data.messages.length, 'messages');
+                renderMessages(data.messages);
+            }
+        })
+        .catch(err => console.error('[ERROR]', err));
+}
+
+function renderMessages(messages) {
+    const historyDiv = document.getElementById('messageHistory');
+    const reversedMessages = [...messages].reverse();
+
+    const html = reversedMessages.map(msg => {
+        const timeStr = new Date(msg.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        return `<div class="message-item"><div class="message-header"><span class="sender-name">${escapeHtml(msg.sender.username)}</span><span class="message-time">${timeStr}</span></div><p class="message-text">${escapeHtml(msg.message)}</p></div>`;
+    }).join('');
+
+    historyDiv.innerHTML = html || '<div class="empty-state">No messages yet. Start the conversation!</div>';
+    historyDiv.scrollTop = historyDiv.scrollHeight;
+}
+
+function sendMessage(event) {
+    event.preventDefault();
+    const input = document.getElementById('messageInput');
+    const message = input.value.trim();
+    if (!message) return;
+
+    fetch('/groups/api/messages/create/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({ group_id: groupId, message: message })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            input.value = '';
+            fetchMessages();
+        }
+    });
+}
+
+function addExpense() {
+    const desc = document.getElementById('expenseDesc').value.trim();
+    const amount = parseFloat(document.getElementById('expenseAmount').value);
+    if (!desc || !amount || amount <= 0) {
+        alert('Please enter valid description and amount');
+        return;
+    }
+
+    // First, create the expense in the database
+    fetch('/groups/api/create-expense/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({
+            group_id: groupId,
+            amount: amount,
+            description: desc
+        })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            const expenseId = data.expense.id;
+            currentExpenseId = expenseId;
+            currentExpenseAmount = amount;
+            document.getElementById('expenseDesc').value = '';
+            document.getElementById('expenseAmount').value = '';
+            document.getElementById('emptyState').style.display = 'none';
+            document.getElementById('splitTableWrapper').style.display = 'flex';
+            document.getElementById('loadingState').style.display = 'block';
+            document.getElementById('splitTable').style.display = 'none';
+            generateSplitSuggestion(expenseId, amount, desc);
+        } else {
+            alert('Error: ' + (data.error || 'Failed to create expense'));
+        }
+    })
+    .catch(err => {
+        console.error('Error creating expense:', err);
+        alert('Error: Failed to create expense');
+    });
+}
+
+function generateSplitSuggestion(expenseId, amount, description) {
+    fetch('/groups/api/generate-split-suggestion/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({
+            expense_id: expenseId,
+            group_id: groupId,
+            amount: amount,
+            description: description
+        })
+    })
+    .then(r => r.json())
+    .then(data => {
+        document.getElementById('loadingState').style.display = 'none';
+        if (data.success && data.splits) {
+            displaySplitSuggestions(data.splits, data.total);
+        } else {
+            alert('Error: ' + (data.error || 'Unknown error'));
+        }
+    });
+}
+
+function displaySplitSuggestions(splits, totalAmount) {
+    const tbody = document.getElementById('splitTableBody');
+    tbody.innerHTML = splits.map(split => `
+        <tr>
+            <td class="member-name">${escapeHtml(split.username)}</td>
+            <td class="amount-display">₹${split.suggested_amount.toFixed(2)}</td>
+            <td><input type="number" class="amount-input" data-user-id="${split.user_id}" value="${split.suggested_amount}" step="0.01"></td>
+            <td class="rationale">${escapeHtml(split.rationale)}</td>
+        </tr>
+    `).join('');
+
+    document.getElementById('totalAmount').textContent = '₹' + totalAmount.toFixed(2);
+    document.getElementById('splitTable').style.display = 'table';
+    splits.forEach(s => { currentSplits[s.user_id] = s.final_amount; });
+}
+
+function finalizeSplit() {
+    const adjustments = {};
+    document.querySelectorAll('.amount-input').forEach(input => {
+        adjustments[parseInt(input.dataset.userId)] = parseFloat(input.value);
+    });
+    const total = Object.values(adjustments).reduce((a, b) => a + b, 0);
+    if (Math.abs(total - currentExpenseAmount) > 0.01) {
+        alert('Total must equal ₹' + currentExpenseAmount.toFixed(2));
+        return;
+    }
+    fetch('/groups/api/finalize-split/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify({ expense_id: currentExpenseId, adjustments: adjustments })
+    })
+    .then(r => r.json())
+    .then(data => {
+        if (data.success) {
+            alert('Split finalized!');
+            document.getElementById('splitTableWrapper').style.display = 'none';
+            document.getElementById('emptyState').style.display = 'block';
+            currentExpenseId = null;
+            currentExpenseAmount = null;
+            currentSplits = {};
+        }
+    });
+}
+
+function regenerateSuggestions() {
+    if (currentExpenseId && currentExpenseAmount) {
+        document.getElementById('loadingState').style.display = 'block';
+        document.getElementById('splitTable').style.display = 'none';
+        const desc = document.querySelectorAll('[data-description]')[0]?.dataset.description || 'Expense';
+        generateSplitSuggestion(currentExpenseId, currentExpenseAmount, desc);
+    }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    fetchMessages();
+    setInterval(fetchMessages, 5000);
+});
+</script>
+{% endblock %}

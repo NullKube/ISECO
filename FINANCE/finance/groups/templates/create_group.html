@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+
+{% block title %}Create Group - ISECO{% endblock %}
+{% block page_heading %}Create Group{% endblock %}
+{% block page_subtitle %}Launch a shared workspace for budgets, members, and group spending.{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <p class="eyebrow">Groups</p>
+        <h2>New shared group</h2>
+        <p class="page-copy">Invite others, organize expenses, and keep shared budgets visible.</p>
+    </div>
+    <a href="/groups/list/" class="action-btn action-outline">Back to groups</a>
+</div>
+<section class="card form-card">
+    {% if message %}
+    <div class="notification notification-success">{{ message }}</div>
+    {% endif %}
+
+    <form method="POST" class="form-grid">
+        {% csrf_token %}
+        <div class="form-group">
+            <label class="form-label">Group name</label>
+            <input class="form-input" type="text" name="name" required>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Created by (user id)</label>
+            <input class="form-input" type="number" name="created_by" required>
+        </div>
+        <div class="button-row">
+            <button class="action-btn action-purple" type="submit">Create group</button>
+            <a href="/groups/list/" class="action-btn action-outline">Cancel</a>
+        </div>
+    </form>
+</section>
+
+{% if group %}
+<section class="card section-card">
+    <div class="section-card-header">
+        <h3>Invite members now</h3>
+        <p class="page-copy">Your group is ready. Use the search panel to invite users by username and let them accept through Alerts.</p>
+    </div>
+    <div class="list-card" style="margin-bottom:16px;">
+        <article class="list-item">
+            <div>
+                <p class="list-item-meta"><strong>Group:</strong> {{ group.name }}</p>
+                <p class="list-item-meta"><strong>Group ID:</strong> {{ group.id }}</p>
+                <p class="list-item-meta"><strong>Created by:</strong> {{ group.created_by.username }}</p>
+            </div>
+        </article>
+    </div>
+    <div class="button-row">
+        <a class="action-btn action-teal" href="/groups/add-member/?group={{ group.id }}&sender={{ group.created_by.id }}">Search users and invite</a>
+        <a class="action-btn action-outline" href="/groups/{{ group.id }}/view/">View group</a>
+    </div>
+</section>
+{% endif %}
+{% endblock %}

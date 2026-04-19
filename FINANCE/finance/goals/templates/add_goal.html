@@ -1,0 +1,641 @@
+{% extends "base.html" %}
+{% block title %}Add Goal - ISECO{% endblock %}
+
+{% block extra_head %}
+<style>
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 24px;
+    margin-bottom: 48px;
+}
+
+.header-content h2 {
+    font-family: 'Syne', sans-serif;
+    font-size: 36px;
+    font-weight: 700;
+    color: #fff;
+    margin: 0 0 12px 0;
+}
+
+.eyebrow {
+    font-size: 14px;
+    color: rgba(255,255,255,0.5);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+}
+
+.page-copy {
+    font-size: 15px;
+    color: rgba(255,255,255,0.5);
+}
+
+/* ===== BUTTON FIX ===== */
+.button-row {
+    display: flex;
+    gap: 16px;
+}
+
+/* top buttons - VERTICAL STACK */
+.top-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    align-items: flex-end;
+}
+
+.action-btn {
+    padding: 14px 26px;
+    border-radius: 14px;
+    font-size: 14px;
+    font-weight: 600;
+    text-align: center;
+    transition: all 0.25s ease;
+    text-decoration: none;
+    width: 220px;
+    cursor: pointer;
+    border: none;
+}
+
+.action-teal {
+    background: linear-gradient(135deg, #4ade80, #22c55e);
+    color: #fff;
+    box-shadow: 0 0 25px rgba(74,222,128,0.35);
+}
+
+.action-teal:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 40px rgba(74,222,128,0.6);
+}
+
+.action-outline {
+    border: 1px solid rgba(255,255,255,0.2);
+    color: rgba(255,255,255,0.8);
+    background: rgba(255,255,255,0.05);
+}
+
+.action-outline:hover {
+    background: rgba(255,255,255,0.1);
+}
+
+.action-blue {
+    background: linear-gradient(135deg, #3b82f6, #2563eb);
+    color: #fff;
+    box-shadow: 0 0 25px rgba(59,130,246,0.35);
+}
+
+.action-blue:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 40px rgba(59,130,246,0.6);
+}
+
+.action-red {
+    background: linear-gradient(135deg, #ef4444, #dc2626);
+    color: #fff;
+    box-shadow: 0 0 25px rgba(239,68,68,0.35);
+}
+
+.action-red:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 40px rgba(239,68,68,0.6);
+}
+
+/* ===== FORM CARD ===== */
+.form-card {
+    background: rgba(255,255,255,0.025);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 20px;
+    padding: 40px;
+}
+
+/* ===== FORM ===== */
+.form-grid {
+    display: grid;
+    gap: 24px;
+    max-width: 520px;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.form-label {
+    color: rgba(255,255,255,0.9);
+}
+
+.form-input {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 12px;
+    padding: 16px 20px;
+    color: #fff;
+}
+
+/* ===== SLIDER ===== */
+input[type="range"] {
+    appearance: none;
+    width: 100%;
+    height: 6px;
+    border-radius: 999px;
+    background: rgba(255,255,255,0.2);
+}
+
+input[type="range"]::-webkit-slider-thumb {
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    background: #4ade80;
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 0 10px rgba(74,222,128,0.7);
+}
+
+/* ===== BADGE ===== */
+.priority-badge {
+    background: rgba(74,222,128,0.2);
+    color: #4ade80;
+    padding: 4px 12px;
+    border-radius: 20px;
+}
+
+/* ===== FEASIBILITY MODAL ===== */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-overlay.active {
+    display: flex;
+}
+
+.modal-content {
+    background: #1a1a2e;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 20px;
+    padding: 40px;
+    max-width: 500px;
+    width: 90%;
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.modal-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+}
+
+.modal-icon {
+    font-size: 32px;
+}
+
+.modal-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 24px;
+    color: #fff;
+    margin: 0;
+}
+
+.modal-body {
+    color: rgba(255,255,255,0.8);
+    line-height: 1.6;
+    margin-bottom: 24px;
+}
+
+.modal-stats {
+    background: rgba(255,255,255,0.05);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 24px;
+}
+
+.stat-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.stat-row:last-child {
+    border-bottom: none;
+}
+
+.stat-label {
+    color: rgba(255,255,255,0.6);
+}
+
+.stat-value {
+    color: #fff;
+    font-weight: 600;
+}
+
+.stat-value.success {
+    color: #4ade80;
+}
+
+.stat-value.danger {
+    color: #ef4444;
+}
+
+.suggestion-box {
+    background: rgba(59,130,246,0.1);
+    border: 1px solid rgba(59,130,246,0.3);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 24px;
+}
+
+.suggestion-title {
+    color: #60a5fa;
+    font-weight: 600;
+    margin-bottom: 12px;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+}
+
+/* ===== LOADING SPINNER ===== */
+.loading-spinner {
+    display: none;
+    width: 40px;
+    height: 40px;
+    border: 4px solid rgba(255,255,255,0.1);
+    border-top-color: #4ade80;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 20px auto;
+}
+
+.loading-spinner.active {
+    display: block;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ===== ALERT BOXES ===== */
+.alert-box {
+    padding: 16px 20px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+}
+
+.alert-success {
+    background: rgba(74,222,128,0.1);
+    border: 1px solid rgba(74,222,128,0.3);
+    color: #4ade80;
+}
+
+.alert-warning {
+    background: rgba(239,68,68,0.1);
+    border: 1px solid rgba(239,68,68,0.3);
+    color: #ef4444;
+}
+
+/* ===== MOBILE ===== */
+@media (max-width: 640px) {
+    .page-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 32px;
+    }
+
+    .top-buttons {
+        align-items: stretch;
+        width: 100%;
+    }
+
+    .action-btn {
+        width: 100%;
+    }
+
+    .modal-actions {
+        flex-direction: column;
+    }
+
+    .modal-actions .action-btn {
+        width: 100%;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="header-content">
+        <h2>New financial target</h2>
+        <p class="page-copy">Set up your next savings goal with AI-powered feasibility checking.</p>
+    </div>
+
+    <div class="button-row top-buttons">
+        <a href="/goals/list/" class="action-btn action-teal">Goal list</a>
+        <a href="/goals/suggestions/" class="action-btn action-outline">✨ AI suggestions</a>
+    </div>
+</div>
+
+<section class="form-card">
+    <form method="POST" class="form-grid" id="goalForm">
+        {% csrf_token %}
+
+        <div class="form-group">
+            <label class="form-label">Goal Name</label>
+            <input class="form-input" type="text" name="name" id="goalName" placeholder="e.g. Vacation Fund, Emergency Savings" required>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Target Amount (₹)</label>
+            <input class="form-input" type="number" name="target_amount" id="targetAmount" placeholder="₹50,000" required>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Priority: <span id="priorityValue">5</span>/10</label>
+            <input class="form-input" type="range" name="priority" min="1" max="10" value="5" id="prioritySlider">
+            <div style="display:flex; justify-content:space-between;">
+                <span style="color:rgba(255,255,255,0.5);font-size:12px;">Low</span>
+                <span class="priority-badge" id="priorityBadge">Medium</span>
+                <span style="color:rgba(255,255,255,0.5);font-size:12px;">High</span>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">Deadline</label>
+            <input class="form-input" type="date" name="deadline" id="deadline" required>
+        </div>
+
+        <div class="button-row">
+            <button class="action-btn action-teal" type="button" id="checkFeasibilityBtn">Check Feasibility</button>
+            <button class="action-btn action-blue" type="submit" id="createGoalBtn" style="display:none;">Create Goal</button>
+            <a href="/goals/list/" class="action-btn action-outline">Cancel</a>
+        </div>
+    </form>
+
+    <div class="loading-spinner" id="loadingSpinner"></div>
+</section>
+
+<!-- FEASIBILITY RESULT MODAL -->
+<div class="modal-overlay" id="feasibilityModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <span class="modal-icon" id="modalIcon">🎯</span>
+            <h3 class="modal-title" id="modalTitle">Feasibility Check Result</h3>
+        </div>
+
+        <div class="modal-body" id="modalBody">
+            <!-- Content populated by JS -->
+        </div>
+
+        <div class="modal-stats" id="modalStats">
+            <!-- Stats populated by JS -->
+        </div>
+
+        <div class="suggestion-box" id="suggestionBox" style="display:none;">
+            <div class="suggestion-title">💡 AI Suggestion</div>
+            <div id="suggestionContent"></div>
+        </div>
+
+        <div class="modal-actions" id="modalActions">
+            <!-- Actions populated by JS -->
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const slider = document.getElementById("prioritySlider");
+const value = document.getElementById("priorityValue");
+const badge = document.getElementById("priorityBadge");
+
+function updateSlider() {
+    value.textContent = slider.value;
+
+    const percent = ((slider.value - 1) / 9) * 100;
+    slider.style.background = `linear-gradient(to right, #4ade80 ${percent}%, rgba(255,255,255,0.2) ${percent}%)`;
+
+    if (slider.value >= 8) {
+        badge.textContent = "High";
+        badge.style.color = "#ef4444";
+        badge.style.background = "rgba(239,68,68,0.2)";
+    } else if (slider.value >= 5) {
+        badge.textContent = "Medium";
+        badge.style.color = "#4ade80";
+        badge.style.background = "rgba(74,222,128,0.2)";
+    } else {
+        badge.textContent = "Low";
+        badge.style.color = "#f97316";
+        badge.style.background = "rgba(249,115,22,0.2)";
+    }
+}
+
+slider.addEventListener("input", updateSlider);
+updateSlider();
+
+// Set minimum date to today
+const today = new Date().toISOString().split('T')[0];
+document.getElementById('deadline').setAttribute('min', today);
+
+// Check feasibility before creating goal
+document.getElementById('checkFeasibilityBtn').addEventListener('click', async function() {
+    const form = document.getElementById('goalForm');
+    const formData = new FormData(form);
+
+    const name = formData.get('name');
+    const targetAmount = formData.get('target_amount');
+    const priority = formData.get('priority');
+    const deadline = formData.get('deadline');
+
+    // Validate
+    if (!name || !targetAmount || !deadline) {
+        alert('Please fill in all fields');
+        return;
+    }
+
+    // Show loading
+    document.getElementById('loadingSpinner').classList.add('active');
+    this.disabled = true;
+
+    try {
+        const response = await fetch('/goals/api/check-feasibility/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+            },
+            body: JSON.stringify({
+                name: name,
+                target_amount: parseFloat(targetAmount),
+                priority: parseInt(priority),
+                deadline: deadline
+            })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            showFeasibilityModal(data);
+        } else {
+            alert('Error: ' + data.error);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Failed to check feasibility. Please try again.');
+    } finally {
+        document.getElementById('loadingSpinner').classList.remove('active');
+        this.disabled = false;
+    }
+});
+
+function showFeasibilityModal(data) {
+    const modal = document.getElementById('feasibilityModal');
+    const modalIcon = document.getElementById('modalIcon');
+    const modalTitle = document.getElementById('modalTitle');
+    const modalBody = document.getElementById('modalBody');
+    const modalStats = document.getElementById('modalStats');
+    const suggestionBox = document.getElementById('suggestionBox');
+    const suggestionContent = document.getElementById('suggestionContent');
+    const modalActions = document.getElementById('modalActions');
+
+    const feasibility = data.feasibility_data;
+    const suggestion = data.suggestion;
+
+    if (data.is_feasible) {
+        // Goal is feasible
+        modalIcon.textContent = '✅';
+        modalTitle.textContent = 'Goal is Feasible!';
+        modalBody.innerHTML = `
+            <div class="alert-box alert-success">
+                <strong>Great news!</strong> Your goal can be achieved by the selected deadline.
+            </div>
+            <p>Based on your savings history and current financial situation, you can comfortably reach this goal.</p>
+        `;
+
+        modalStats.innerHTML = `
+            <div class="stat-row">
+                <span class="stat-label">Months remaining</span>
+                <span class="stat-value">${feasibility.months_left}</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Required monthly savings</span>
+                <span class="stat-value">₹${feasibility.required_monthly.toLocaleString()}</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Your average monthly savings</span>
+                <span class="stat-value success">₹${feasibility.actual_monthly.toLocaleString()}</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Surplus</span>
+                <span class="stat-value success">₹${(feasibility.cumulative_available - feasibility.cumulative_needed).toLocaleString()}</span>
+            </div>
+        `;
+
+        suggestionBox.style.display = 'none';
+
+        modalActions.innerHTML = `
+            <button class="action-btn action-outline" onclick="closeModal()">Review</button>
+            <button class="action-btn action-teal" onclick="createGoal()">Create Goal</button>
+        `;
+    } else {
+        // Goal is NOT feasible - show suggestion
+        modalIcon.textContent = '⚠️';
+        modalTitle.textContent = 'Goal Needs Adjustment';
+        modalBody.innerHTML = `
+            <div class="alert-box alert-warning">
+                <strong>Not feasible</strong> at the current deadline.
+            </div>
+            <p>Based on your savings history, you would need ₹${feasibility.required_monthly.toLocaleString()}/month, but your average is only ₹${feasibility.actual_monthly.toLocaleString()}/month.</p>
+            <p><strong>${feasibility.reason}</strong></p>
+        `;
+
+        modalStats.innerHTML = `
+            <div class="stat-row">
+                <span class="stat-label">Months remaining</span>
+                <span class="stat-value">${feasibility.months_left}</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Required monthly</span>
+                <span class="stat-value danger">₹${feasibility.required_monthly.toLocaleString()}</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Your average monthly</span>
+                <span class="stat-value">₹${feasibility.actual_monthly.toLocaleString()}</span>
+            </div>
+            <div class="stat-row">
+                <span class="stat-label">Shortfall</span>
+                <span class="stat-value danger">₹${feasibility.shortfall.toLocaleString()}</span>
+            </div>
+        `;
+
+        if (suggestion && suggestion.new_deadline) {
+            suggestionBox.style.display = 'block';
+            suggestionContent.innerHTML = `
+                <p><strong>Proposed new deadline:</strong> ${formatDate(suggestion.new_deadline)}</p>
+                <p style="margin-top:8px;font-size:14px;color:rgba(255,255,255,0.7);">${suggestion.reason}</p>
+            `;
+
+            modalActions.innerHTML = `
+                <button class="action-btn action-outline" onclick="closeModal()">Keep Original</button>
+                <button class="action-btn action-blue" onclick="acceptSuggestion('${suggestion.new_deadline}')">Accept Suggestion</button>
+            `;
+        } else {
+            suggestionBox.style.display = 'block';
+            suggestionContent.innerHTML = `
+                <p><strong>No feasible date found within 3 years.</strong></p>
+                <p style="margin-top:8px;font-size:14px;color:rgba(255,255,255,0.7);">Consider reducing the target amount or increasing your income.</p>
+            `;
+
+            modalActions.innerHTML = `
+                <button class="action-btn action-teal" onclick="createGoal()">Create Anyway</button>
+            `;
+        }
+    }
+
+    modal.classList.add('active');
+}
+
+function closeModal() {
+    document.getElementById('feasibilityModal').classList.remove('active');
+    document.getElementById('checkFeasibilityBtn').disabled = false;
+}
+
+function createGoal() {
+    const form = document.getElementById('goalForm');
+    form.submit();
+}
+
+function acceptSuggestion(newDeadline) {
+    const form = document.getElementById('goalForm');
+    const formData = new FormData(form);
+
+    // Update the deadline field with suggested date
+    document.getElementById('deadline').value = newDeadline;
+
+    // Submit the form to create goal with new deadline
+    form.submit();
+}
+
+function formatDate(dateStr) {
+    const date = new Date(dateStr + 'T00:00:00');
+    return date.toLocaleDateString('en-IN', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+    });
+}
+</script>
+{% endblock %}

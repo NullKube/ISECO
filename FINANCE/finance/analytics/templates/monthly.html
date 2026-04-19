@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block title %}Monthly Analytics — ISECO{% endblock %}
+{% block page_heading %}Monthly Analytics{% endblock %}
+{% block page_subtitle %}See your income and expense trends for the selected month.{% endblock %}
+
+{% block content %}
+<div class="grid grid-3" style="gap:1.5rem; margin-bottom:1.5rem;">
+    <div class="card stat-card">
+        <h3>Month</h3>
+        <div class="stat-value">{{ month }}/{{ year }}</div>
+    </div>
+    <div class="card stat-card">
+        <h3>Total Income</h3>
+        <div class="stat-value">₹{{ monthly_income|default:'0' }}</div>
+    </div>
+    <div class="card stat-card">
+        <h3>Total Expense</h3>
+        <div class="stat-value">₹{{ monthly_expense|default:'0' }}</div>
+    </div>
+</div>
+<div class="card">
+    <a class="action-btn action-outline" href="/analytics/summary/">Back to Summary</a>
+</div>
+{% endblock %}

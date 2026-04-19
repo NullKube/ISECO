@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block title %}{{ page_title }} - ISECO{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <a href="/ai/feasibility/multi/" class="back-link">&larr; Back to Multi-Goal Analysis</a>
+    <h1>{{ page_title }}</h1>
+    <p>Feasibility analysis for your goal</p>
+</div>
+
+<div class="grid grid-2">
+    <div class="card">
+        <h2>Goal Details</h2>
+        <ul class="styled">
+            <li><strong>Name:</strong> {{ goal.name }}</li>
+            <li><strong>Target Amount:</strong> ₹{{ goal.target_amount|floatformat:0 }}</li>
+            <li><strong>Amount Saved:</strong> ₹{{ goal.amount_saved|floatformat:0 }}</li>
+            <li><strong>Remaining:</strong> ₹{{ feasibility.remaining|floatformat:0 }}</li>
+            <li><strong>Deadline:</strong> {{ goal.deadline|date:"M Y" }}</li>
+            <li><strong>Months Left:</strong> {{ feasibility.months_left }}</li>
+            <li><strong>Priority:</strong> {{ goal.priority }}/10</li>
+        </ul>
+    </div>
+
+    <div class="card">
+        <h2>Feasibility Analysis</h2>
+
+        <div style="text-align: center; padding: 1rem;">
+            {% if feasibility.possible %}
+            <span class="badge badge-success" style="font-size: 1rem; padding: 0.5rem 1rem;">ACHIEVABLE</span>
+            {% else %}
+            <span class="badge badge-danger" style="font-size: 1rem; padding: 0.5rem 1rem;">NOT ACHIEVABLE</span>
+            {% endif %}
+        </div>
+
+        <ul class="styled" style="margin-top: 1rem;">
+            <li><strong>Required/Month:</strong> ₹{{ feasibility.required_per_month|floatformat:0 }}</li>
+            <li><strong>Your Savings/Month:</strong> ₹{{ feasibility.monthly_savings|floatformat:0 }}</li>
+            <li><strong>Competing Goals:</strong> {{ feasibility.competing_goals_count }} (need ₹{{ feasibility.competing_goals_requirement|floatformat:0 }}/mo)</li>
+            <li><strong>Total Required:</strong> ₹{{ feasibility.total_required|floatformat:0 }}/month</li>
+        </ul>
+
+        <div class="ai-box" style="margin-top: 1rem;">
+            <small>{{ feasibility.reason }}</small>
+        </div>
+    </div>
+</div>
+
+<div class="card" style="margin-top: 1.5rem; text-align: center;">
+    <a href="/ai/feasibility/multi/" class="btn btn-primary">View All Goals Analysis &rarr;</a>
+</div>
+{% endblock %}

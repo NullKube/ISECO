@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}Analytics Summary — ISECO{% endblock %}
+{% block page_heading %}Analytics Summary{% endblock %}
+{% block page_subtitle %}Track income, expenses and financial trends at a glance.{% endblock %}
+
+{% block content %}
+<div class="grid grid-3" style="gap:1.5rem; margin-bottom:1.5rem;">
+    <div class="card stat-card">
+        <h3>Total Income</h3>
+        <div class="stat-value">₹{{ total_income|default:'0' }}</div>
+    </div>
+    <div class="card stat-card">
+        <h3>Total Expense</h3>
+        <div class="stat-value">₹{{ total_expense|default:'0' }}</div>
+    </div>
+    <div class="card stat-card">
+        <h3>Balance</h3>
+        <div class="stat-value">₹{{ balance|default:'0' }}</div>
+    </div>
+</div>
+<div class="card">
+    <h2>Overview</h2>
+    <p class="list-item-meta">Active Goals: {{ active_goals|default:'0' }}</p>
+    <div style="margin-top: 1rem; display:flex; gap:10px; flex-wrap:wrap;">
+        <a class="action-btn action-outline" href="/analytics/monthly/">Monthly Breakdown</a>
+        <a class="action-btn action-outline" href="/analytics/categories/">Category Breakdown</a>
+    </div>
+</div>
+{% endblock %}

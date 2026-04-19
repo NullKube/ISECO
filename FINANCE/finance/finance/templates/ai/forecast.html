@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+
+{% block title %}Savings Forecast - ISECO{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <a href="/ai/engine/" class="back-link">&larr; Back to AI Engine</a>
+    <h1>Savings Forecast</h1>
+    <p>{{ method|upper }} Projection for the next {{ months }} months</p>
+</div>
+
+{% if ai_explanation %}
+<div class="ai-box">
+    <h3>AI Forecast Analysis</h3>
+    <p>{{ ai_explanation }}</p>
+</div>
+{% endif %}
+
+<div class="grid grid-3" style="margin-top: 1.5rem;">
+    {% if current_month %}
+    <div class="card stat-card">
+        <h3>Current Month</h3>
+        <div class="stat-value">₹{{ current_month.savings_mtd|floatformat:0 }}</div>
+        <div class="stat-label">Saved So Far</div>
+        <p style="margin-top: 0.5rem; font-size: 0.875rem;">
+            {{ current_month.month }} - Day {{ current_month.days_elapsed }}/{{ current_month.total_days }}
+        </p>
+        {% if current_month.projected_month_end %}
+        <p style="font-size: 0.875rem; color: var(--primary);">
+            Projected: ₹{{ current_month.projected_month_end|floatformat:0 }}
+        </p>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    {% if summary %}
+    <div class="card stat-card">
+        <h3>Average</h3>
+        <div class="stat-value">₹{{ summary.average_monthly_savings|floatformat:0 }}</div>
+        <div class="stat-label">Monthly Average</div>
+        <p style="margin-top: 0.5rem; font-size: 0.875rem;">
+            Over {{ summary.total_completed_months|default:"N/A" }} months
+        </p>
+    </div>
+    {% endif %}
+
+    {% if model_accuracy %}
+    <div class="card stat-card">
+        <h3>Model Accuracy</h3>
+        <div class="stat-value" style="font-size: 1.5rem;">{{ model_accuracy }}</div>
+        <div class="stat-label">{{ accuracy_interpretation }}</div>
+    </div>
+    {% endif %}
+</div>
+
+{% if trend_message %}
+<div class="card" style="margin-top: 1.5rem;">
+    <h2>Trend Analysis</h2>
+    <p style="font-size: 1.1rem;">{{ trend_message }}</p>
+</div>
+{% endif %}
+
+<div class="card" style="margin-top: 1.5rem;">
+    <h2>Forecast Timeline</h2>
+    <table style="width: 100%; border-collapse: collapse;">
+        <thead>
+            <tr style="border-bottom: 2px solid var(--border);">
+                <th style="padding: 0.75rem; text-align: left;">Month</th>
+                <th style="padding: 0.75rem; text-align: right;">Predicted Savings</th>
+                <th style="padding: 0.75rem; text-align: right;">Cumulative</th>
+                <th style="padding: 0.75rem; text-align: center;">Trend</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in forecast %}
+            <tr style="border-bottom: 1px solid var(--border);">
+                <td style="padding: 0.75rem;">{{ item.month_name }}</td>
+                <td style="padding: 0.75rem; text-align: right;">₹{{ item.predicted_monthly_savings|floatformat:0 }}</td>
+                <td style="padding: 0.75rem; text-align: right;">₹{{ item.expected_cumulative_savings|floatformat:0 }}</td>
+                <td style="padding: 0.75rem; text-align: center; font-size: 1.25rem;">{{ item.trend_emoji }}</td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="4" style="padding: 1rem; text-align: center; color: var(--text-muted);">
+                    No forecast data available
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% if historical_breakdown %}
+<div class="card" style="margin-top: 1.5rem;">
+    <h2>Historical Performance</h2>
+    <table style="width: 100%; border-collapse: collapse;">
+        <thead>
+            <tr style="border-bottom: 2px solid var(--border);">
+                <th style="padding: 0.75rem; text-align: left;">Month</th>
+                <th style="padding: 0.75rem; text-align: right;">Income</th>
+                <th style="padding: 0.75rem; text-align: right;">Expenses</th>
+                <th style="padding: 0.75rem; text-align: right;">Savings</th>
+                <th style="padding: 0.75rem; text-align: center;">Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in historical_breakdown %}
+            <tr style="border-bottom: 1px solid var(--border);">
+                <td style="padding: 0.75rem;">{{ item.month }}</td>
+                <td style="padding: 0.75rem; text-align: right;">₹{{ item.income|floatformat:0 }}</td>
+                <td style="padding: 0.75rem; text-align: right;">₹{{ item.expense|floatformat:0 }}</td>
+                <td style="padding: 0.75rem; text-align: right;">₹{{ item.savings|floatformat:0 }}</td>
+                <td style="padding: 0.75rem; text-align: center;">{{ item.emoji }} {{ item.status }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+
+<div class="card" style="margin-top: 1.5rem; text-align: center;">
+    <a href="/ai/monthly/" class="btn btn-outline">View Detailed Monthly Analysis</a>
+</div>
+{% endblock %}

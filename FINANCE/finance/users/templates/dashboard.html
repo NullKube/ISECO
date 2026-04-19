@@ -1,0 +1,907 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <title>ISECO — Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600&family=Syne:wght@500;600;700;800&family=DM+Mono:wght@400;500&display=swap"
+    rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: #09090b;
+      color: #d4d4d8;
+    }
+
+    ::-webkit-scrollbar { width: 3px; }
+    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 4px; }
+
+    /* ── SIDEBAR ── */
+    aside {
+      width: 220px;
+      flex-shrink: 0;
+      background: rgba(255,255,255,0.015);
+      border-right: 0.5px solid rgba(255,255,255,0.07);
+      display: flex;
+      flex-direction: column;
+      padding: 20px 14px;
+    }
+
+    .logo {
+      display: flex; align-items: center; gap: 9px;
+      margin-bottom: 28px; padding: 0 6px;
+    }
+    .logo-icon {
+      width: 28px; height: 28px; background: #3b5bdb;
+      border-radius: 7px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .logo-text { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 800; color: #fff; letter-spacing: 0.3px; }
+
+    nav { display: flex; flex-direction: column; gap: 1px; flex: 1; }
+
+    .nav-link {
+      display: flex; align-items: center; gap: 9px;
+      padding: 8px 10px; border-radius: 8px;
+      font-size: 13px; font-weight: 500;
+      color: rgba(255,255,255,0.35);
+      text-decoration: none; transition: background 0.15s, color 0.15s;
+    }
+    .nav-link:hover { background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.65); }
+    .nav-link.active { background: rgba(255,255,255,0.06); color: #fff; }
+    .nav-link svg { width: 14px; height: 14px; flex-shrink: 0; opacity: 0.6; }
+    .nav-link.active svg { opacity: 1; }
+
+    .user-divider {
+      border-top: 0.5px solid rgba(255,255,255,0.06);
+      padding-top: 14px; margin-top: 12px;
+      display: flex; align-items: center; gap: 9px; padding-left: 6px;
+    }
+    .user-avatar {
+      width: 28px; height: 28px; border-radius: 50%;
+      background: rgba(255,255,255,0.07);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 600; color: rgba(255,255,255,0.35); flex-shrink: 0;
+    }
+    .user-name { font-size: 12px; font-weight: 500; color: rgba(255,255,255,0.55); }
+    .user-logout { font-size: 11px; color: rgba(255,255,255,0.22); text-decoration: none; }
+    .user-logout:hover { color: #f87171; }
+
+    /* ── HEADER ── */
+    header {
+      padding: 14px 28px;
+      border-bottom: 0.5px solid rgba(255,255,255,0.06);
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 10;
+      background: rgba(9,9,11,0.92);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+    }
+    .header-title { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; color: #fff; }
+    .header-sub { font-size: 11px; color: rgba(255,255,255,0.22); margin-top: 2px; }
+
+    /* ── BUTTONS ── */
+    .btn {
+      height: 28px; padding: 0 12px; border-radius: 7px;
+      border: 0.5px solid rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.5);
+      font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 500;
+      cursor: pointer; transition: background 0.15s, color 0.15s;
+      display: inline-flex; align-items: center; gap: 5px; text-decoration: none;
+    }
+    .btn:hover { background: rgba(255,255,255,0.07); color: #fff; }
+    .btn-primary { background: #3b5bdb; color: #fff; border-color: transparent; }
+    .btn-primary:hover { background: #3451c4; }
+    .btn-ai { background: rgba(92,92,230,0.12); color: #9775fa; border-color: rgba(92,92,230,0.2); }
+    .btn-ai:hover { background: rgba(92,92,230,0.2); }
+
+    /* ── AI TOGGLE ── */
+    .ai-toggle {
+      display: inline-flex; align-items: center; gap: 7px;
+      height: 28px; padding: 0 12px; border-radius: 7px;
+      font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 600;
+      cursor: pointer; border: none; transition: background 0.2s;
+    }
+    .ai-toggle.on  { background: rgba(92,92,230,0.15); color: #9775fa; }
+    .ai-toggle.off { background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.35); border: 0.5px solid rgba(255,255,255,0.1); }
+
+    .toggle-track {
+      width: 26px; height: 14px; border-radius: 999px; position: relative; flex-shrink: 0;
+    }
+    .ai-toggle.on  .toggle-track { background: rgba(255,255,255,0.25); }
+    .ai-toggle.off .toggle-track { background: rgba(255,255,255,0.1); }
+    .toggle-thumb {
+      width: 10px; height: 10px; border-radius: 50%; position: absolute; top: 2px; transition: left 0.2s;
+    }
+    .ai-toggle.on  .toggle-thumb { left: 14px; background: #9775fa; }
+    .ai-toggle.off .toggle-thumb { left: 2px; background: rgba(255,255,255,0.25); }
+
+    /* ── LAYOUT ── */
+    .page-wrap { padding: 24px 28px 60px; display: flex; flex-direction: column; gap: 24px; max-width: 1120px; }
+
+    /* ── SECTION LABEL ── */
+    .section-label {
+      font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
+      color: rgba(255,255,255,0.22); display: flex; align-items: center; gap: 8px; margin-bottom: 14px;
+    }
+    .section-dot {
+      width: 7px; height: 7px; border-radius: 50%;
+      background: #4ade80; box-shadow: 0 0 6px #4ade80; flex-shrink: 0;
+      animation: blink 1.5s infinite;
+    }
+    @keyframes blink { 0%,50%{opacity:1} 51%,100%{opacity:0.25} }
+
+    /* ── BASE CARD ── */
+    .card {
+      background: rgba(255,255,255,0.025);
+      border: 0.5px solid rgba(255,255,255,0.07);
+      border-radius: 16px; padding: 24px 26px;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+    .card:hover { border-color: rgba(255,255,255,0.11); }
+
+    /* ── AI DISABLED BANNER ── */
+    .ai-disabled-banner {
+      background: rgba(255,255,255,0.02);
+      border: 0.5px dashed rgba(255,255,255,0.08);
+      border-radius: 10px; padding: 12px 14px;
+      font-size: 12px; color: rgba(255,255,255,0.28); text-align: left;
+    }
+
+    /* ── STAT GRID ── */
+    .stats-grid { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 14px; }
+    .stat-card {
+      background: rgba(255,255,255,0.025);
+      border: 0.5px solid rgba(255,255,255,0.07);
+      border-radius: 12px; padding: 18px 20px;
+      transition: border-color 0.2s, transform 0.22s;
+    }
+    .stat-card:hover { border-color: rgba(255,255,255,0.12); transform: translateY(-2px); }
+    .stat-lbl { font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: rgba(255,255,255,0.25); margin-bottom: 10px; }
+    .stat-val { font-family: 'Syne', sans-serif; font-size: 26px; font-weight: 700; letter-spacing: -0.5px; line-height: 1; }
+    .stat-sub { font-size: 11px; color: rgba(255,255,255,0.22); margin-top: 6px; }
+    .v-green  { color: #4ade80; }
+    .v-red    { color: #f87171; }
+    .v-blue   { color: #74c0fc; }
+    .v-purple { color: #c084fc; }
+
+    /* ── FORECAST CARD ── */
+    .forecast-card {
+      background: rgba(255,255,255,0.025);
+      border: 0.5px solid rgba(255,255,255,0.07);
+      border-radius: 16px; padding: 24px 26px;
+      transition: border-color 0.2s;
+    }
+    .forecast-card:hover { border-color: rgba(255,255,255,0.11); }
+
+    .forecast-title { font-size: 20px; font-weight: 600; color: #fff; letter-spacing: -0.3px; margin-bottom: 3px; }
+    .forecast-sub   { font-size: 12px; color: rgba(255,255,255,0.28); margin-bottom: 20px; }
+
+    .method-pill {
+      font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase;
+      padding: 3px 10px; border-radius: 5px;
+      background: rgba(255,255,255,0.04); border: 0.5px solid rgba(255,255,255,0.08);
+      color: rgba(255,255,255,0.3);
+    }
+
+    .progress-block {
+      background: rgba(255,255,255,0.03); border: 0.5px solid rgba(255,255,255,0.06);
+      border-radius: 10px; padding: 14px 16px; margin-bottom: 18px;
+    }
+    .prog-row { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 8px; }
+    .prog-month { color: rgba(255,255,255,0.65); font-weight: 500; }
+    .prog-saved { color: #4ade80; font-weight: 600; }
+    .prog-bar   { height: 3px; background: rgba(255,255,255,0.06); border-radius: 999px; overflow: hidden; }
+    .prog-fill  { height: 100%; border-radius: 999px; background: #4ade80; }
+    .prog-meta  { display: flex; justify-content: space-between; font-size: 10px; color: rgba(255,255,255,0.22); margin-top: 6px; }
+    .prog-pace  { font-size: 11px; color: rgba(255,255,255,0.3); font-style: italic; margin-top: 5px; }
+
+    .chart-wrap { height: 220px; margin-bottom: 4px; }
+
+    .forecast-legend { display: flex; gap: 18px; margin-bottom: 14px; }
+    .legend-item { display: flex; align-items: center; gap: 6px; font-family: 'DM Mono', monospace; font-size: 10px; color: rgba(255,255,255,0.3); letter-spacing: 0.04em; }
+    .legend-line { width: 16px; height: 1.5px; display: inline-block; }
+    .legend-dot  { width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
+
+    .forecast-stats { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 0.5px; background: rgba(255,255,255,0.06); border: 0.5px solid rgba(255,255,255,0.07); border-radius: 10px; overflow: hidden; margin-top: 16px; }
+    .fstat { background: #09090b; padding: 12px 14px; }
+    .fstat-lbl { font-family: 'DM Mono', monospace; font-size: 9px; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(255,255,255,0.22); margin-bottom: 5px; }
+    .fstat-val { font-size: 16px; font-weight: 600; color: #fff; }
+    .fstat-sub { font-size: 10px; color: rgba(255,255,255,0.25); margin-top: 2px; }
+
+    .view-btn {
+      display: block; width: 100%; margin-top: 14px; padding: 9px 0; text-align: center;
+      font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
+      color: rgba(255,255,255,0.3); border: 0.5px solid rgba(255,255,255,0.07);
+      border-radius: 7px; background: transparent; cursor: pointer;
+      transition: background 0.15s, color 0.15s; text-decoration: none;
+    }
+    .view-btn:hover { background: rgba(255,255,255,0.04); color: rgba(255,255,255,0.65); }
+
+    /* ── PANEL CARD ── */
+    .grid-3 { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 14px; }
+    .grid-2 { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
+
+    .panel-card {
+      background: rgba(255,255,255,0.025); border: 0.5px solid rgba(255,255,255,0.07);
+      border-radius: 16px; padding: 20px 22px;
+      position: relative; overflow: hidden;
+      transition: border-color 0.2s, transform 0.22s cubic-bezier(.22,.68,0,1.2);
+    }
+    .panel-card:hover { border-color: rgba(255,255,255,0.12); transform: translateY(-3px); }
+
+    .panel-accent { position: absolute; top: 0; left: 0; right: 0; height: 2px; }
+
+    /* ── TAGS ── */
+    .tag {
+      display: inline-flex; align-items: center; gap: 5px;
+      font-size: 10px; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase;
+      padding: 3px 10px; border-radius: 999px; margin-bottom: 6px;
+    }
+    .tag-red    { background: rgba(248,113,113,0.1);  color: #f87171; border: 0.5px solid rgba(248,113,113,0.18); }
+    .tag-purple { background: rgba(192,132,252,0.1);  color: #c084fc; border: 0.5px solid rgba(192,132,252,0.18); }
+    .tag-green  { background: rgba(74,222,128,0.1);   color: #4ade80; border: 0.5px solid rgba(74,222,128,0.18); }
+    .tag-blue   { background: rgba(116,192,252,0.1);  color: #74c0fc; border: 0.5px solid rgba(116,192,252,0.18); }
+    .tag-orange { background: rgba(251,146,60,0.1);   color: #fb923c; border: 0.5px solid rgba(251,146,60,0.18); }
+    .tag-cyan   { background: rgba(34,211,238,0.1);   color: #22d3ee; border: 0.5px solid rgba(34,211,238,0.18); }
+    .tag-lime   { background: rgba(163,230,53,0.1);   color: #a3e635; border: 0.5px solid rgba(163,230,53,0.18); }
+    .tag-gray   { background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.38); border: 0.5px solid rgba(255,255,255,0.1); }
+
+    .panel-sub { font-size: 11px; color: rgba(255,255,255,0.25); margin-bottom: 14px; margin-top: -2px; }
+
+    /* ── ROW ITEMS ── */
+    .row-item {
+      display: flex; align-items: flex-start; gap: 9px;
+      padding: 8px 0; border-bottom: 0.5px solid rgba(255,255,255,0.04);
+      font-size: 12px; color: rgba(255,255,255,0.45);
+    }
+    .row-item:last-child { border-bottom: none; }
+    .row-dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; margin-top: 5px; }
+    .row-item-between { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; border-bottom: 0.5px solid rgba(255,255,255,0.04); font-size: 12px; }
+    .row-item-between:last-child { border-bottom: none; }
+
+    .scroll-fade { max-height: 160px; overflow-y: auto; }
+
+    /* ── GHOST BUTTON ── */
+    .ghost-btn {
+      display: inline-flex; align-items: center; gap: 5px;
+      font-size: 10px; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase;
+      border: 0.5px solid currentColor; border-radius: 6px; padding: 5px 11px;
+      opacity: 0.4; transition: opacity 0.15s; background: transparent; cursor: pointer;
+      margin-top: 14px; text-decoration: none;
+    }
+    .ghost-btn:hover { opacity: 1; }
+
+    /* ── CLUSTERS ── */
+    .cluster-list { display: flex; flex-direction: column; gap: 10px; margin-top: 4px; }
+    .cluster-row  { display: flex; align-items: center; justify-content: space-between; }
+    .cluster-label{ display: flex; align-items: center; gap: 8px; font-size: 13px; color: rgba(255,255,255,0.55); }
+    .cluster-num  { font-family: 'Syne', sans-serif; font-size: 22px; font-weight: 700; }
+
+    /* ── AI RESULT CARD ── */
+    .ai-result-card {
+      background: rgba(92,92,230,0.06); border: 0.5px solid rgba(92,92,230,0.15);
+      border-radius: 16px; padding: 22px 24px;
+      display: flex; gap: 16px; align-items: flex-start;
+      transition: border-color 0.2s;
+    }
+    .ai-result-card:hover { border-color: rgba(92,92,230,0.25); }
+    .ai-icon {
+      width: 36px; height: 36px; border-radius: 10px;
+      background: rgba(92,92,230,0.15); border: 0.5px solid rgba(92,92,230,0.2);
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .ai-result-tag {
+      display: inline-block; font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+      padding: 2px 9px; border-radius: 999px;
+      background: rgba(192,132,252,0.1); color: #c084fc; border: 0.5px solid rgba(192,132,252,0.18);
+      margin-bottom: 7px;
+    }
+    .ai-result-text { font-size: 13px; line-height: 1.7; color: rgba(255,255,255,0.55); }
+
+    /* ── GROUPS ── */
+    .groups-row { display: flex; flex-wrap: wrap; gap: 10px; }
+    .group-pill {
+      display: flex; align-items: center; gap: 8px;
+      padding: 8px 14px; border-radius: 10px;
+      background: rgba(255,255,255,0.025); border: 0.5px solid rgba(255,255,255,0.07);
+      font-size: 13px; color: rgba(255,255,255,0.6); cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+    }
+    .group-pill:hover { background: rgba(255,255,255,0.05); border-color: rgba(255,255,255,0.12); }
+    .group-avatar {
+      width: 24px; height: 24px; border-radius: 50%;
+      background: #3b5bdb; display: flex; align-items: center; justify-content: center;
+      font-size: 10px; font-weight: 700; color: #fff; flex-shrink: 0;
+    }
+
+    /* ── FOOTER ── */
+    .dash-footer {
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 11px; color: rgba(255,255,255,0.15);
+      border-top: 0.5px solid rgba(255,255,255,0.05); padding-top: 18px;
+    }
+    .dash-footer a { color: rgba(255,255,255,0.18); text-decoration: none; transition: color 0.15s; }
+    .dash-footer a:hover { color: rgba(255,255,255,0.45); }
+
+    /* ── CTA BUTTON ── */
+    .cta-btn {
+      margin-top: 16px; height: 32px; padding: 0 16px;
+      background: #3b5bdb; color: #fff; border: none; border-radius: 8px;
+      font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 600;
+      cursor: pointer; transition: background 0.15s;
+      text-decoration: none; display: inline-flex; align-items: center;
+    }
+    .cta-btn:hover { background: #3451c4; }
+  </style>
+</head>
+
+<body>
+<div style="display:flex;height:100vh;">
+
+  <!-- ═══ SIDEBAR ═══ -->
+  <aside>
+    <div class="logo">
+      <div class="logo-icon">
+        <svg width="15" height="15" fill="none" stroke="#fff" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+            d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+        </svg>
+      </div>
+      <span class="logo-text">ISECO</span>
+    </div>
+
+    <nav>
+      <a href="/users/dashboard/" class="nav-link active">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+        Dashboard
+      </a>
+      <a href="/ai/forecast/" class="nav-link">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+        Forecast
+      </a>
+      <a href="/expenses/" class="nav-link">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z"/></svg>
+        Expenses
+      </a>
+      <a href="/goals/" class="nav-link">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        Goals
+      </a>
+      <a href="/groups/" class="nav-link">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+        Groups
+      </a>
+      <a href="/ai/engine/" class="nav-link">
+        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+        AI Engine
+      </a>
+    </nav>
+
+    <div class="user-divider">
+      <div class="user-avatar">{{ username|default:'U'|slice:":1"|upper }}</div>
+      <div>
+        <div class="user-name">{{ username|default:'User' }}</div>
+        <a href="/users/logout/" class="user-logout">Logout</a>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ═══ MAIN ═══ -->
+  <main style="flex:1;overflow-y:auto;">
+
+    <header>
+      <div>
+        <div class="header-title">Super Dashboard</div>
+        <div class="header-sub">Forecast · Insights · Allocations · Clustering · Strategy · Alerts</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;justify-content:flex-end;">
+        <a href="/users/dashboard/"><button class="btn">Refresh</button></a>
+        <a href="/expenses/add/"><button class="btn">+ Expense</button></a>
+        <a href="/goals/add/"><button class="btn">+ Goal</button></a>
+        <a href="/groups/create/"><button class="btn">+ Group</button></a>
+        <a href="/ai/suggestions/"><button class="btn btn-ai">✦ AI Suggestions</button></a>
+        <form method="POST" action="/users/toggle-ai/" style="margin:0;">
+          {% csrf_token %}
+          <button type="submit" class="ai-toggle {% if ai_enabled %}on{% else %}off{% endif %}">
+            <span class="toggle-track"><span class="toggle-thumb"></span></span>
+            {% if ai_enabled %}✦ AI On{% else %}AI Off{% endif %}
+          </button>
+        </form>
+      </div>
+    </header>
+
+    <div class="page-wrap">
+
+      {% if not ai_enabled %}
+      <div class="ai-disabled-banner">
+        <strong style="color:rgba(255,255,255,0.4);">AI features are disabled.</strong>
+        Rule-based data (overspending, feasibility, clusters) still loads. Toggle AI on for Ollama-powered suggestions, insights, and strategy.
+      </div>
+      {% endif %}
+
+      <!-- ─── MONTHLY SUMMARY ─── -->
+      <div>
+        <div class="section-label"><span class="section-dot"></span>Monthly Summary</div>
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-lbl">Avg Income</div>
+            <div class="stat-val v-green">₹{{ monthly_avg.monthly_income|default:"0" }}</div>
+            <div class="stat-sub">Monthly average</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-lbl">Avg Expense</div>
+            <div class="stat-val v-red">₹{{ monthly_avg.monthly_expense|default:"0" }}</div>
+            <div class="stat-sub">Monthly average</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-lbl">Monthly Savings</div>
+            <div class="stat-val v-blue">₹{{ monthly_avg.monthly_savings|default:"0" }}</div>
+            <div class="stat-sub">Income minus expenses</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-lbl">Total Savings</div>
+            <div class="stat-val v-purple">₹{{ total_savings|default:"0" }}</div>
+            <div class="stat-sub">All time accumulated</div>
+          </div>
+        </div>
+        <a href="/ai/monthly/" class="cta-btn" style="margin-top:14px;">View Detailed Analysis →</a>
+      </div>
+
+      <!-- ─── SAVINGS FORECAST ─── -->
+      <div>
+        <div class="section-label"><span class="section-dot"></span>Savings Forecast</div>
+        <div class="forecast-card">
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px;">
+            <div>
+              <div class="forecast-title">Savings Forecast</div>
+              <div class="forecast-sub">
+                {% if forecast.method == "linear_regression" %}ML-Powered Prediction · {{ forecast.trend_message }}
+                {% else %}Six-month trajectory &amp; projection{% endif %}
+              </div>
+            </div>
+            <span class="method-pill">
+              {% if forecast.method == "linear_regression" %}Machine Learning{% else %}Simple Average{% endif %}
+            </span>
+          </div>
+
+          {% if forecast.current_month %}
+          <div class="progress-block">
+            <div class="prog-row">
+              <span class="prog-month">{{ forecast.current_month.month }} (In Progress)</span>
+              <span class="prog-saved">₹{{ forecast.current_month.savings_mtd }} saved so far</span>
+            </div>
+            <div class="prog-bar"><div class="prog-fill" style="width:{{ forecast.current_month.progress_pct }}%"></div></div>
+            <div class="prog-meta">
+              <span>Day {{ forecast.current_month.days_elapsed }}/{{ forecast.current_month.total_days }}</span>
+              <span>{{ forecast.current_month.progress_pct }}% complete</span>
+            </div>
+            {% if forecast.current_month.pace_message %}<div class="prog-pace">{{ forecast.current_month.pace_message }}</div>{% endif %}
+          </div>
+          {% endif %}
+
+          <div class="forecast-legend">
+            <span class="legend-item"><span class="legend-line" style="background:#4ade80;"></span>Historical Savings</span>
+            <span class="legend-item"><span class="legend-dot" style="background:#fb923c;"></span>Current Month (MTD)</span>
+            <span class="legend-item"><span class="legend-line" style="background:#74c0fc;border-top:1.5px dashed #74c0fc;height:0;"></span>Forecasted Savings</span>
+          </div>
+
+          <div class="chart-wrap">
+            <canvas id="forecastChart"></canvas>
+          </div>
+
+          <div class="forecast-stats">
+            {% if forecast.model_accuracy %}
+            <div class="fstat">
+              <div class="fstat-lbl">Model Accuracy</div>
+              <div class="fstat-val">{{ forecast.model_accuracy }}</div>
+              <div class="fstat-sub">{{ forecast.accuracy_interpretation|truncatewords:3 }}</div>
+            </div>
+            {% endif %}
+            {% if forecast.months_used_for_training %}
+            <div class="fstat">
+              <div class="fstat-lbl">Training Data</div>
+              <div class="fstat-val">{{ forecast.months_used_for_training }}mo</div>
+              <div class="fstat-sub">Historical data</div>
+            </div>
+            {% endif %}
+            {% if forecast.summary %}
+            <div class="fstat">
+              <div class="fstat-lbl">Avg Savings</div>
+              <div class="fstat-val">₹{{ forecast.summary.average_monthly_savings }}</div>
+              <div class="fstat-sub">Per month</div>
+            </div>
+            <div class="fstat">
+              <div class="fstat-lbl">Best Month</div>
+              <div class="fstat-val" style="color:#4ade80;">₹{{ forecast.summary.highest_month.savings }}</div>
+              <div class="fstat-sub">{{ forecast.summary.highest_month.month|truncatewords:2 }}</div>
+            </div>
+            {% endif %}
+          </div>
+
+          <a href="/ai/forecast/" class="view-btn">View Full Forecast Analysis →</a>
+        </div>
+      </div>
+
+      <!-- ─── ALERTS & INSIGHTS ROW ─── -->
+      <div>
+        <div class="section-label"><span class="section-dot"></span>Alerts &amp; Insights</div>
+        <div class="grid-3">
+
+          <!-- Overspending -->
+          <div class="panel-card">
+            <div class="panel-accent" style="background:linear-gradient(90deg,#f87171,transparent);"></div>
+            <div class="tag tag-red">⚠ Overspending</div>
+            <div class="panel-sub">Categories exceeding thresholds</div>
+            <div class="scroll-fade">
+              {% for o in overspending %}
+              <div class="row-item">
+                <div class="row-dot" style="background:#f87171;"></div>
+                <div>
+                  <span style="color:rgba(255,255,255,0.75);font-weight:500;">{{ o.category }}</span>
+                  <span style="color:rgba(255,255,255,0.3);"> — overspent by </span>
+                  <span style="color:#f87171;font-weight:600;">{{ o.amount_over }}</span>
+                  <span style="color:rgba(255,255,255,0.2);font-size:11px;"> ({{ o.period }})</span>
+                </div>
+              </div>
+              {% empty %}
+              <p style="font-size:12px;color:rgba(255,255,255,0.22);padding:8px 0;">No overspending detected 🎉</p>
+              {% endfor %}
+            </div>
+            <a href="/ai/overspending/" class="ghost-btn" style="color:#f87171;">Full Report →</a>
+          </div>
+
+          <!-- Alerts -->
+          <div class="panel-card">
+            <div class="panel-accent" style="background:linear-gradient(90deg,#c084fc,transparent);"></div>
+            <div class="tag tag-purple">Alerts</div>
+            <div class="panel-sub">Important notifications</div>
+            <div class="scroll-fade">
+              {% for a in alerts %}
+              <div class="row-item">
+                <div class="row-dot" style="background:#c084fc;"></div>
+                <div>
+                  <span style="color:#c084fc;font-weight:600;">{{ a.type }}:</span>
+                  <span> {{ a.message }}</span>
+                </div>
+              </div>
+              {% empty %}
+              <p style="font-size:12px;color:rgba(255,255,255,0.22);padding:8px 0;">No alerts. All good ✅</p>
+              {% endfor %}
+            </div>
+            <a href="/ai/alerts/" class="ghost-btn" style="color:#c084fc;">All Alerts →</a>
+          </div>
+
+          <!-- AI Suggestions -->
+          <div class="panel-card">
+            <div class="panel-accent" style="background:linear-gradient(90deg,#4ade80,transparent);"></div>
+            <div class="tag tag-green">✦ AI Suggestions</div>
+            <div class="panel-sub">{% if ai_enabled %}Personalized recommendations{% else %}AI disabled{% endif %}</div>
+            {% if ai_enabled %}
+            <div class="scroll-fade">
+              {% for s in suggestions %}
+              <div class="row-item">
+                <div class="row-dot" style="background:#4ade80;"></div>
+                <span>{{ s }}</span>
+              </div>
+              {% empty %}
+              <p style="font-size:12px;color:rgba(255,255,255,0.22);padding:8px 0;">No suggestions available.</p>
+              {% endfor %}
+            </div>
+            <a href="/ai/suggestions/" class="ghost-btn" style="color:#4ade80;">View More →</a>
+            {% else %}
+            <div class="ai-disabled-banner">Enable AI to see personalized suggestions from Ollama.</div>
+            {% endif %}
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ─── SPENDING & STRATEGY ROW ─── -->
+      <div>
+        <div class="section-label"><span class="section-dot"></span>Spending &amp; Strategy</div>
+        <div class="grid-3">
+
+          <!-- Spending Clusters -->
+          <div class="panel-card">
+            <div class="panel-accent" style="background:linear-gradient(90deg,#74c0fc,transparent);"></div>
+            <div class="tag tag-blue">Spending Clusters</div>
+            <div class="panel-sub">Categorized spending patterns</div>
+            {% if clusters.type == "buckets" %}
+            <div class="cluster-list">
+              <div class="cluster-row">
+                <div class="cluster-label"><span style="width:7px;height:7px;border-radius:50%;background:#f87171;flex-shrink:0;"></span>High Spenders</div>
+                <span class="cluster-num" style="color:#f87171;">{{ clusters.High|length }}</span>
+              </div>
+              <div class="cluster-row">
+                <div class="cluster-label"><span style="width:7px;height:7px;border-radius:50%;background:#fb923c;flex-shrink:0;"></span>Medium Spenders</div>
+                <span class="cluster-num" style="color:#fb923c;">{{ clusters.Medium|length }}</span>
+              </div>
+              <div class="cluster-row">
+                <div class="cluster-label"><span style="width:7px;height:7px;border-radius:50%;background:#4ade80;flex-shrink:0;"></span>Low Spenders</div>
+                <span class="cluster-num" style="color:#4ade80;">{{ clusters.Low|length }}</span>
+              </div>
+            </div>
+            {% else %}
+            <div class="scroll-fade">
+              {% for idx, center in clusters.centers.items %}
+              <div class="row-item">
+                <span style="font-size:10px;font-weight:700;letter-spacing:0.06em;text-transform:uppercase;color:rgba(255,255,255,0.2);flex-shrink:0;">C{{ idx }}</span>
+                <span>{{ center }}</span>
+              </div>
+              {% empty %}
+              <p style="font-size:12px;color:rgba(255,255,255,0.22);padding:8px 0;">No clusters yet.</p>
+              {% endfor %}
+            </div>
+            {% endif %}
+            <a href="/ai/clustering/" class="ghost-btn" style="color:#74c0fc;">Explore →</a>
+          </div>
+
+          <!-- Monthly Strategy -->
+          <div class="panel-card">
+            <div class="panel-accent" style="background:linear-gradient(90deg,#fb923c,transparent);"></div>
+            <div class="tag tag-orange">Monthly Strategy</div>
+            <div class="panel-sub">{% if ai_enabled %}Your financial action plan{% else %}AI disabled{% endif %}</div>
+            {% if ai_enabled %}
+            <div class="scroll-fade">
+              {% for step in strategy %}
+              <div class="row-item">
+                <div class="row-dot" style="background:#fb923c;"></div>
+                <span>{{ step }}</span>
+              </div>
+              {% empty %}
+              <p style="font-size:12px;color:rgba(255,255,255,0.22);padding:8px 0;">No strategy available.</p>
+              {% endfor %}
+            </div>
+            <a href="/ai/strategy/" class="ghost-btn" style="color:#fb923c;">Full Planner →</a>
+            {% else %}
+            <div class="ai-disabled-banner">Enable AI to generate your monthly action plan.</div>
+            {% endif %}
+          </div>
+
+          <!-- Behavioral Insights -->
+          <div class="panel-card">
+            <div class="panel-accent" style="background:linear-gradient(90deg,#22d3ee,transparent);"></div>
+            <div class="tag tag-cyan">Behavioral Insights</div>
+            <div class="panel-sub">{% if ai_enabled %}Understanding your spending habits{% else %}AI disabled{% endif %}</div>
+            {% if ai_enabled %}
+            <div class="scroll-fade">
+              {% for insight in insights %}
+              <div class="row-item">
+                <div class="row-dot" style="background:#22d3ee;"></div>
+                <span>{{ insight }}</span>
+              </div>
+              {% empty %}
+              <p style="font-size:12px;color:rgba(255,255,255,0.22);padding:8px 0;">No insights available.</p>
+              {% endfor %}
+            </div>
+            <a href="/ai/insights/" class="ghost-btn" style="color:#22d3ee;">Full Insights →</a>
+            {% else %}
+            <div class="ai-disabled-banner">Enable AI to see behavioral insights.</div>
+            {% endif %}
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ─── GOALS & RECENT EXPENSES ─── -->
+      <div>
+        <div class="section-label"><span class="section-dot"></span>Goals &amp; Transactions</div>
+        <div class="grid-2">
+
+          <!-- Goal Feasibility -->
+          <div class="panel-card">
+            <div class="panel-accent" style="background:linear-gradient(90deg,#a3e635,transparent);"></div>
+            <div class="tag tag-lime">Goal Feasibility</div>
+            <div class="panel-sub">Can you achieve your goals?</div>
+            <div class="scroll-fade">
+              {% for f in feasibilities %}
+              <div class="row-item">
+                <div class="row-dot" style="background:{% if f.possible %}#4ade80{% else %}#f87171{% endif %};"></div>
+                <div>
+                  <span style="color:rgba(255,255,255,0.75);font-weight:500;">Goal {{ f.goal_id }}:</span>
+                  {% if f.possible %}
+                  <span style="color:#4ade80;font-weight:500;"> Feasible ✓</span>
+                  {% else %}
+                  <span style="color:#f87171;font-weight:500;"> Not feasible</span>
+                  <span style="color:rgba(255,255,255,0.25);font-size:11px;"> — {{ f.reason }}</span>
+                  {% endif %}
+                </div>
+              </div>
+              {% empty %}
+              <p style="font-size:12px;color:rgba(255,255,255,0.22);padding:8px 0;">No feasibility checks yet.</p>
+              {% endfor %}
+            </div>
+            <a href="{% url 'ai_engine:feasibility-multi' %}" class="ghost-btn" style="color:#a3e635;">Goal Feasibility →</a>
+          </div>
+
+          <!-- Recent Expenses -->
+          <div class="panel-card">
+            <div class="panel-accent" style="background:linear-gradient(90deg,rgba(255,255,255,0.15),transparent);"></div>
+            <div class="tag tag-gray">Recent Expenses</div>
+            <div class="panel-sub">Latest transactions</div>
+            <div class="scroll-fade">
+              {% for e in recent_expenses %}
+              <div class="row-item-between">
+                <div>
+                  <span style="color:rgba(255,255,255,0.75);font-weight:500;">{{ e.category }}</span>
+                  <span style="color:rgba(255,255,255,0.22);font-size:11px;"> · {{ e.type }} · {{ e.date }}</span>
+                </div>
+                <span style="font-family:'Syne',sans-serif;font-weight:700;color:#fff;margin-left:16px;flex-shrink:0;">₹{{ e.amount }}</span>
+              </div>
+              {% empty %}
+              <p style="font-size:12px;color:rgba(255,255,255,0.22);padding:8px 0;">No recent expenses.</p>
+              {% endfor %}
+            </div>
+            <a href="/expenses/" class="ghost-btn" style="color:rgba(255,255,255,0.3);">View All →</a>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ─── COMBINED AI RESULT ─── -->
+      <div class="ai-result-card">
+        <div class="ai-icon">
+          <svg width="16" height="16" fill="none" stroke="#9775fa" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+          </svg>
+        </div>
+        <div style="flex:1;">
+          <div class="ai-result-tag">Combined AI Result</div>
+          <p class="ai-result-text">{{ combined_result|default:"Keep tracking your expenses and we'll generate insights for you!" }}</p>
+          {% if ai_enabled %}
+          <a href="/ai/engine/"><button class="btn btn-primary" style="margin-top:12px;height:30px;">Open Full AI Engine</button></a>
+          {% endif %}
+        </div>
+      </div>
+
+      <!-- ─── GROUPS ─── -->
+      <div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+          <div class="section-label" style="margin-bottom:0;"><span class="section-dot"></span>Your Groups</div>
+          <a href="/groups/create/" class="ghost-btn" style="color:#c084fc;margin-top:0;">+ New Group</a>
+        </div>
+        <div class="groups-row">
+          {% for g in groups %}
+          <div class="group-pill">
+            <div class="group-avatar">{{ g.name|slice:":1"|upper }}</div>
+            <span>{{ g.name }}</span>
+          </div>
+          {% empty %}
+          <p style="font-size:13px;color:rgba(255,255,255,0.22);">No groups yet. Create one to start collaborating!</p>
+          {% endfor %}
+        </div>
+      </div>
+
+      <!-- ─── FOOTER ─── -->
+      <div class="dash-footer">
+        <div>Built with ISECO — intelligent savings &amp; expense coordination.</div>
+        <div style="display:flex;gap:18px;">
+          <a href="/privacy/">Privacy Policy</a>
+          <a href="/terms/">Terms of Service</a>
+        </div>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script>
+  const forecastData = {{ forecast|safe }};
+
+  let labels = [];
+  let historicalData = [];
+  let forecastDataPoints = [];
+  let currentMonthData = null;
+
+  if (forecastData.historical_breakdown) {
+    forecastData.historical_breakdown.forEach(item => {
+      labels.push(item.month.split(' ')[0]);
+      historicalData.push(item.savings);
+    });
+  }
+
+  if (forecastData.current_month) {
+    labels.push(forecastData.current_month.month.split(' ')[0]);
+    currentMonthData = forecastData.current_month.savings_mtd;
+    historicalData.push(null);
+  }
+
+  if (forecastData.forecast) {
+    forecastData.forecast.forEach(item => {
+      const monthName = item.month_name ? item.month_name.split(' ')[0] : `+${item.month_offset}m`;
+      labels.push(monthName);
+      forecastDataPoints.push(item.predicted_monthly_savings);
+    });
+  }
+
+  const totalLength = labels.length;
+  const historicalLength = forecastData.historical_breakdown ? forecastData.historical_breakdown.length : 0;
+
+  while (historicalData.length < totalLength) { historicalData.push(null); }
+
+  const forecastStartIndex = historicalLength + (forecastData.current_month ? 1 : 0);
+  for (let i = 0; i < forecastStartIndex; i++) { forecastDataPoints.unshift(null); }
+
+  const forecastCtx = document.getElementById('forecastChart').getContext('2d');
+  new Chart(forecastCtx, {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [
+        {
+          label: 'Historical Savings',
+          data: historicalData,
+          borderColor: '#4ade80',
+          backgroundColor: 'rgba(74,222,128,0.06)',
+          tension: 0.4, fill: true, borderWidth: 1.5,
+          pointRadius: 4, pointBackgroundColor: '#4ade80',
+          pointBorderColor: '#09090b', pointBorderWidth: 2
+        },
+        {
+          label: 'Current Month (MTD)',
+          data: currentMonthData !== null
+            ? [...Array(historicalLength).fill(null), currentMonthData, ...Array(forecastDataPoints.filter(x => x !== null).length).fill(null)]
+            : [],
+          borderColor: '#fb923c', backgroundColor: '#fb923c',
+          borderWidth: 0, pointRadius: 8, showLine: false,
+          pointBackgroundColor: '#fb923c', pointBorderColor: '#09090b', pointBorderWidth: 3
+        },
+        {
+          label: 'Forecasted Savings',
+          data: forecastDataPoints,
+          borderColor: 'rgba(116,192,252,0.5)',
+          backgroundColor: 'rgba(116,192,252,0.04)',
+          tension: 0.4, fill: true, borderWidth: 1.5, borderDash: [5,4],
+          pointRadius: 4, pointBackgroundColor: '#74c0fc',
+          pointBorderColor: '#09090b', pointBorderWidth: 2
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: 'rgba(9,9,11,0.97)',
+          titleColor: 'rgba(255,255,255,0.65)',
+          bodyColor: 'rgba(255,255,255,0.4)',
+          borderColor: 'rgba(255,255,255,0.08)',
+          borderWidth: 0.5, padding: 10,
+          titleFont: { size: 12, weight: 'bold' },
+          bodyFont: { size: 12 },
+          callbacks: {
+            label: function(context) {
+              if (context.parsed.y === null) return null;
+              return context.dataset.label + ': ₹' + context.parsed.y.toLocaleString();
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid: { color: 'rgba(255,255,255,0.04)' },
+          ticks: { color: 'rgba(255,255,255,0.25)', font: { size: 11 } },
+          border: { color: 'rgba(255,255,255,0.05)' }
+        },
+        y: {
+          beginAtZero: true,
+          grid: { color: 'rgba(255,255,255,0.04)', lineWidth: 0.5 },
+          ticks: {
+            color: 'rgba(255,255,255,0.25)', font: { size: 11 },
+            callback: function(value) { return '₹' + value.toLocaleString(); }
+          },
+          border: { display: false }
+        }
+      }
+    }
+  });
+</script>
+</body>
+</html>

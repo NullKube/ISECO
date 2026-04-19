@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}Smart Suggestions — ISECO{% endblock %}
+{% block page_heading %}Smart Suggestions{% endblock %}
+{% block page_subtitle %}Personalized recommendations to optimize your finances.{% endblock %}
+
+{% block content %}
+<div class="card" style="margin-bottom: 1.5rem;">
+    <a class="action-btn action-outline" href="/ai/engine/">← Back to AI Engine</a>
+</div>
+<div class="card">
+    <h2>Your Suggestions</h2>
+    <div class="list-card">
+        {% if suggestions %}
+            {% for s in suggestions %}
+            <article class="list-item">
+                <div class="list-item-meta">{{ s }}</div>
+            </article>
+            {% endfor %}
+        {% else %}
+            <div class="empty-state">No suggestions available right now. Add expenses or goals to get started.</div>
+        {% endif %}
+    </div>
+</div>
+<div class="card" style="text-align: center;">
+    <a class="action-btn action-blue" href="/ai/strategy/">Monthly Strategy</a>
+    <a class="action-btn action-outline" href="/ai/insights/">Behavioral Insights</a>
+    <a class="action-btn action-outline" href="/ai/overspending/">Overspending Check</a>
+</div>
+{% endblock %}

@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+
+{% block title %}Multi-Goal Feasibility - ISECO{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <a href="/ai/engine/" class="back-link">&larr; Back to AI Engine</a>
+    <h1>Multi-Goal Feasibility Analysis</h1>
+    <p>Priority-weighted analysis of all your active goals</p>
+</div>
+
+<div class="card" style="{% if feasible %}background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);{% else %}background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);{% endif %}">
+    <h2 style="{% if feasible %}color: #166534;{% else %}color: #991b1b;{% endif %}">
+        {% if feasible %}✅ All Goals Achievable{% else %}❌ Budget Shortfall Detected{% endif %}
+    </h2>
+    <p style="font-size: 1.1rem; margin-top: 0.5rem;">{{ reason }}</p>
+
+    <div class="grid grid-3" style="margin-top: 1.5rem;">
+        <div style="text-align: center;">
+            <div style="font-size: 1.5rem; font-weight: 700;">₹{{ monthly_savings|floatformat:0 }}</div>
+            <div style="font-size: 0.875rem; color: var(--text-muted);">Your Monthly Savings</div>
+        </div>
+        <div style="text-align: center;">
+            <div style="font-size: 1.5rem; font-weight: 700;">₹{{ total_weighted_requirement|floatformat:0 }}</div>
+            <div style="font-size: 0.875rem; color: var(--text-muted);">Weighted Requirement</div>
+        </div>
+        <div style="text-align: center;">
+            <div style="font-size: 1.5rem; font-weight: 700; color: {% if surplus > 0 %}var(--success);{% else %}var(--danger);{% endif %}">
+                {% if surplus > 0 %}+₹{{ surplus|floatformat:0 }}{% else %}-₹{{ surplus_abs|floatformat:0 }}{% endif %}
+            </div>
+            <div style="font-size: 0.875rem; color: var(--text-muted);">{{ surplus|pluralize:"Surplus,Shortfall" }}</div>
+        </div>
+    </div>
+</div>
+
+<div class="card" style="margin-top: 1.5rem;">
+    <h2>Goal Breakdown</h2>
+    <table style="width: 100%; border-collapse: collapse;">
+        <thead>
+            <tr style="border-bottom: 2px solid var(--border);">
+                <th style="padding: 0.75rem; text-align: left;">Goal</th>
+                <th style="padding: 0.75rem; text-align: right;">Target</th>
+                <th style="padding: 0.75rem; text-align: right;">Saved</th>
+                <th style="padding: 0.75rem; text-align: right;">Remaining</th>
+                <th style="padding: 0.75rem; text-align: center;">Priority</th>
+                <th style="padding: 0.75rem; text-align: right;">Required/Mo</th>
+                <th style="padding: 0.75rem; text-align: center;">Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in goals_with_feasibility %}
+            <tr style="border-bottom: 1px solid var(--border);">
+                <td style="padding: 0.75rem;">
+                    <strong>{{ item.goal.name }}</strong>
+                    <br><small style="color: var(--text-muted);">Deadline: {{ item.goal.deadline|date:"M Y" }}</small>
+                </td>
+                <td style="padding: 0.75rem; text-align: right;">₹{{ item.goal.target_amount|floatformat:0 }}</td>
+                <td style="padding: 0.75rem; text-align: right;">₹{{ item.goal.amount_saved|floatformat:0 }}</td>
+                <td style="padding: 0.75rem; text-align: right;">₹{{ item.feasibility.remaining|floatformat:0 }}</td>
+                <td style="padding: 0.75rem; text-align: center;">
+                    <span class="badge badge-{% if item.goal.priority >= 7 %}success{% elif item.goal.priority >= 4 %}warning{% else %}danger{% endif %}">
+                        {{ item.goal.priority }}
+                    </span>
+                </td>
+                <td style="padding: 0.75rem; text-align: right;">₹{{ item.feasibility.required_per_month|floatformat:0 }}</td>
+                <td style="padding: 0.75rem; text-align: center;">
+                    {% if item.feasibility.possible %}
+                    <span class="badge badge-success">On Track</span>
+                    {% else %}
+                    <span class="badge badge-danger">At Risk</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="7" style="padding: 1rem; text-align: center; color: var(--text-muted);">
+                    No active goals found
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="grid grid-3" style="margin-top: 1.5rem;">
+    <div class="card" style="text-align: center;">
+        <h3>Related Tools</h3>
+        <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: 1rem;">
+            <a href="/ai/strategy/" class="btn btn-outline">Monthly Strategy</a>
+            <a href="/ai/suggestions/" class="btn btn-outline">Get Suggestions</a>
+            <a href="/goals/" class="btn btn-outline">Manage Goals</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

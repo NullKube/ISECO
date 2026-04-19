@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+{% block title %}Monthly Analysis - ISECO{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <a href="/ai/engine/" class="back-link">&larr; Back to AI Engine</a>
+    <h1>Monthly Analysis</h1>
+    <p>Detailed breakdown of your monthly income, expenses, and savings</p>
+</div>
+
+<div class="grid grid-3">
+    <div class="card stat-card">
+        <h3>Monthly Income</h3>
+        <div class="stat-value">₹{{ monthly_income|floatformat:0 }}</div>
+        <div class="stat-label">Average</div>
+    </div>
+
+    <div class="card stat-card">
+        <h3>Monthly Expenses</h3>
+        <div class="stat-value" style="color: var(--danger);">₹{{ monthly_expense|floatformat:0 }}</div>
+        <div class="stat-label">Average</div>
+    </div>
+
+    <div class="card stat-card">
+        <h3>Monthly Savings</h3>
+        <div class="stat-value" style="color: {% if monthly_savings > 0 %}var(--success);{% else %}var(--danger);{% endif %}">
+            ₹{{ monthly_savings|floatformat:0 }}
+        </div>
+        <div class="stat-label">
+            {% if monthly_savings > 0 %}Positive{% elif monthly_savings < 0 %}Negative{% else %}Break-even{% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="card" style="margin-top: 1.5rem;">
+    <h2>Current Month Progress</h2>
+    {% if current_month %}
+    <div class="grid grid-4" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem;">
+        <div style="text-align: center; padding: 1rem; background: var(--bg); border-radius: 8px;">
+            <div style="font-size: 1.25rem; font-weight: 700;">₹{{ current_month.income_mtd|floatformat:0 }}</div>
+            <div style="font-size: 0.875rem; color: var(--text-muted);">Income MTD</div>
+        </div>
+        <div style="text-align: center; padding: 1rem; background: var(--bg); border-radius: 8px;">
+            <div style="font-size: 1.25rem; font-weight: 700;">₹{{ current_month.expense_mtd|floatformat:0 }}</div>
+            <div style="font-size: 0.875rem; color: var(--text-muted);">Expenses MTD</div>
+        </div>
+        <div style="text-align: center; padding: 1rem; background: var(--bg); border-radius: 8px;">
+            <div style="font-size: 1.25rem; font-weight: 700;">₹{{ current_month.savings_mtd|floatformat:0 }}</div>
+            <div style="font-size: 0.875rem; color: var(--text-muted);">Savings MTD</div>
+        </div>
+        <div style="text-align: center; padding: 1rem; background: var(--bg); border-radius: 8px;">
+            <div style="font-size: 1.25rem; font-weight: 700;">{{ current_month.progress_pct }}%</div>
+            <div style="font-size: 0.875rem; color: var(--text-muted);">Month Complete</div>
+        </div>
+    </div>
+
+    {% if current_month.projected_month_end %}
+    <div style="margin-top: 1rem; padding: 1rem; background: var(--bg); border-radius: 8px;">
+        <strong>Projected Month-End:</strong> ₹{{ current_month.projected_month_end|floatformat:0 }}
+        {% if current_month.pace_message %}
+        <br><small>{{ current_month.pace_message }}</small>
+        {% endif %}
+    </div>
+    {% endif %}
+    {% else %}
+    <p>No current month data available.</p>
+    {% endif %}
+</div>
+
+{% if historical_breakdown %}
+<div class="card" style="margin-top: 1.5rem;">
+    <h2>Historical Monthly Breakdown</h2>
+    <table style="width: 100%; border-collapse: collapse;">
+        <thead>
+            <tr style="border-bottom: 2px solid var(--border);">
+                <th style="padding: 0.75rem; text-align: left;">Month</th>
+                <th style="padding: 0.75rem; text-align: right;">Income</th>
+                <th style="padding: 0.75rem; text-align: right;">Expenses</th>
+                <th style="padding: 0.75rem; text-align: right;">Savings</th>
+                <th style="padding: 0.75rem; text-align: center;">Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in historical_breakdown %}
+            <tr style="border-bottom: 1px solid var(--border);">
+                <td style="padding: 0.75rem;">{{ item.month }}</td>
+                <td style="padding: 0.75rem; text-align: right;">₹{{ item.income|floatformat:0 }}</td>
+                <td style="padding: 0.75rem; text-align: right;">₹{{ item.expense|floatformat:0 }}</td>
+                <td style="padding: 0.75rem; text-align: right;">₹{{ item.savings|floatformat:0 }}</td>
+                <td style="padding: 0.75rem; text-align: center;">{{ item.emoji }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endif %}
+
+<div class="card" style="margin-top: 1.5rem; text-align: center;">
+    <a href="/ai/forecast/" class="btn btn-primary">View Full Forecast &rarr;</a>
+</div>
+{% endblock %}

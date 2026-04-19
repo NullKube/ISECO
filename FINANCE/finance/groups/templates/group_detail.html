@@ -1,0 +1,337 @@
+{% extends "base.html" %}
+
+{% block title %}{{ group.name }} - ISECO{% endblock %}
+{% block page_heading %}{{ group.name }}{% endblock %}
+{% block page_subtitle %}Review group members and shared expenses in a clean dashboard card view.{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <p class="eyebrow">Group</p>
+        <h2>{{ group.name }}</h2>
+        <p class="page-copy">Shared budget activity and members at a glance.</p>
+    </div>
+    <div class="button-row">
+        <a href="/groups/list/" class="action-btn action-outline">Back to groups</a>
+        <a href="/groups/{{ group.id }}/space/" class="action-btn action-teal">🚀 Open Group Space</a>
+        <button onclick="openInviteModal()" class="action-btn action-purple">+ Invite member</button>
+        <a href="/notifications/list/" class="action-btn action-outline">Alerts</a>
+    </div>
+</div>
+
+<!-- Invite Modal -->
+<div id="inviteModal" class="modal" style="display: none;">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3>Invite Member to {{ group.name }}</h3>
+            <button class="modal-close" onclick="closeInviteModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="form-group">
+                <label class="form-label">Search by username or user ID</label>
+                <input type="text" id="searchInput" class="form-input" placeholder="Type username or ID..." onkeyup="searchUsers(this.value)">
+            </div>
+            <div id="searchResults" class="search-results" style="margin-top: 16px;"></div>
+            <div id="searchLoading" style="display: none; text-align: center; color: rgba(255,255,255,0.6); margin-top: 16px;">Searching...</div>
+            <div id="searchEmpty" style="display: none; text-align: center; color: rgba(255,255,255,0.5); margin-top: 16px;">No users found</div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Overlay -->
+<div id="modalOverlay" class="modal-overlay" onclick="closeInviteModal()" style="display: none;"></div>
+
+<section class="card section-card">
+    <h3>Members</h3>
+    {% if members %}
+    <div class="list-card">
+        {% for m in members %}
+        <div class="list-item">
+            <div class="list-item-title">
+                <h3>{{ m.user.username }}</h3>
+                <span class="pill blue">Member</span>
+            </div>
+            <div class="list-item-meta">Joined on {{ m.created_at|default:'N/A' }}</div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">No members yet. Add one to start collaborating.</div>
+    {% endif %}
+</section>
+
+<section class="card section-card">
+    <h3>Pending invitations</h3>
+    {% if invites %}
+    <div class="list-card">
+        {% for invite in invites %}
+        <div class="list-item">
+            <div class="list-item-title">
+                <div>
+                    <h3>{{ invite.receiver.username }}</h3>
+                    <div class="list-item-meta">Sent by {{ invite.sender.username }} on {{ invite.created_at }}</div>
+                </div>
+                <a href="/groups/invite/{{ invite.id }}/respond/" class="action-btn action-outline">Respond</a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">No pending invitations at the moment.</div>
+    {% endif %}
+</section>
+
+<section class="card section-card">
+    <h3>Shared expenses</h3>
+    {% if expenses %}
+    <div class="list-card">
+        {% for e in expenses %}
+        <div class="list-item">
+            <div class="list-item-title">
+                <div>
+                    <h3>{{ e.description|default:'Expense' }}</h3>
+                    <div class="list-item-meta">By {{ e.user.username }} · {{ e.date }}</div>
+                </div>
+                <span class="pill {% if e.type == 'income' %}green{% else %}red{% endif %}">₹{{ e.amount }}</span>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">No shared expenses yet.</div>
+    {% endif %}
+</section>
+
+{% endblock %}
+
+{% block extra_head %}
+<style>
+    .modal {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background: var(--surface-strong);
+        border: 1px solid var(--border);
+        border-radius: 22px;
+        z-index: 1000;
+        max-width: 500px;
+        width: 90%;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+    }
+
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0,0,0,0.6);
+        z-index: 999;
+    }
+
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 24px;
+        border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .modal-header h3 {
+        margin: 0;
+        font-size: 1.1rem;
+        font-weight: 700;
+    }
+
+    .modal-close {
+        background: none;
+        border: none;
+        color: var(--text-muted);
+        font-size: 28px;
+        cursor: pointer;
+        padding: 0;
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .modal-close:hover {
+        color: var(--text);
+    }
+
+    .modal-body {
+        padding: 24px;
+    }
+
+    .search-results {
+        display: grid;
+        gap: 10px;
+        max-height: 300px;
+        overflow-y: auto;
+    }
+
+    .search-result-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 14px;
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.06);
+        border-radius: 14px;
+        transition: background 0.2s;
+    }
+
+    .search-result-item:hover {
+        background: rgba(255,255,255,0.06);
+    }
+
+    .search-result-user {
+        flex: 1;
+    }
+
+    .search-result-user-name {
+        font-weight: 600;
+        margin-bottom: 4px;
+    }
+
+    .search-result-user-email {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+    }
+
+    .invite-btn {
+        background: var(--accent);
+        color: white;
+        border: none;
+        border-radius: 10px;
+        padding: 8px 14px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .invite-btn:hover {
+        transform: translateY(-1px);
+        filter: brightness(1.1);
+    }
+
+    .invite-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function openInviteModal() {
+    document.getElementById('inviteModal').style.display = 'block';
+    document.getElementById('modalOverlay').style.display = 'block';
+    document.getElementById('searchInput').focus();
+}
+
+function closeInviteModal() {
+    document.getElementById('inviteModal').style.display = 'none';
+    document.getElementById('modalOverlay').style.display = 'none';
+    document.getElementById('searchInput').value = '';
+    document.getElementById('searchResults').innerHTML = '';
+}
+
+function searchUsers(query) {
+    if (!query.trim()) {
+        document.getElementById('searchResults').innerHTML = '';
+        document.getElementById('searchEmpty').style.display = 'none';
+        document.getElementById('searchLoading').style.display = 'none';
+        return;
+    }
+
+    document.getElementById('searchLoading').style.display = 'block';
+    document.getElementById('searchEmpty').style.display = 'none';
+    document.getElementById('searchResults').innerHTML = '';
+
+    fetch(`/groups/api/search-users/?q=${encodeURIComponent(query)}&group_id={{ group.id }}`)
+        .then(response => response.json())
+        .then(data => {
+            document.getElementById('searchLoading').style.display = 'none';
+
+            if (data.users.length === 0) {
+                document.getElementById('searchEmpty').style.display = 'block';
+            } else {
+                const resultsHtml = data.users.map(user => `
+                    <div class="search-result-item">
+                        <div class="search-result-user">
+                            <div class="search-result-user-name">${user.username}</div>
+                            <div class="search-result-user-email">${user.email}</div>
+                        </div>
+                        <button class="invite-btn" onclick="sendInvite(${user.id}, '${user.username}')">Invite</button>
+                    </div>
+                `).join('');
+                document.getElementById('searchResults').innerHTML = resultsHtml;
+            }
+        })
+        .catch(error => {
+            document.getElementById('searchLoading').style.display = 'none';
+            console.error('Search error:', error);
+        });
+}
+
+function sendInvite(userId, username) {
+    const groupId = {{ group.id }};
+    const senderId = {{ current_user.id }};
+
+    fetch('/groups/api/invite-user/', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken'),
+        },
+        body: JSON.stringify({
+            group_id: groupId,
+            user_id: userId,
+            sender_id: senderId,
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(`Invitation sent to ${username}!`);
+            document.getElementById('searchInput').value = '';
+            document.getElementById('searchResults').innerHTML = '';
+            location.reload();
+        } else {
+            alert('Error: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Failed to send invitation');
+    });
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+// Close modal with Escape key
+document.addEventListener('keydown', function(event) {
+    if (event.key === 'Escape') {
+        closeInviteModal();
+    }
+});
+</script>
+{% endblock %}

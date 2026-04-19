@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}Behavioral Insights - ISECO{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <a href="/ai/engine/" class="back-link">&larr; Back to AI Engine</a>
+    <h1>Behavioral Insights</h1>
+    <p>Actionable insights based on your spending patterns</p>
+</div>
+
+<div class="card">
+    <h2>Your Insights</h2>
+    <ul class="styled">
+        {% for insight in insights %}
+        <li>
+            <div style="padding: 1rem 0; display: flex; align-items: flex-start;">
+                <span style="font-size: 1.25rem; margin-right: 0.75rem;">
+                    {% if "📈" in insight or "📉" in insight %}📊{% elif "No." in insight %}🏷️{% elif "40%" in insight %}💳{% elif "subscription" in insight|lower %}📺{% elif "high" in insight|lower %}⚠️{% else %}💡{% endif %}
+                </span>
+                <span>{{ insight }}</span>
+            </div>
+        </li>
+        {% empty %}
+        <li>No insights available yet. Start tracking your expenses to get personalized insights.</li>
+        {% endfor %}
+    </ul>
+</div>
+
+<div class="grid grid-3" style="margin-top: 1.5rem;">
+    <div class="card" style="text-align: center;">
+        <h3>Explore More</h3>
+        <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: 1rem;">
+            <a href="/ai/clustering/" class="btn btn-outline">Spending Clusters</a>
+            <a href="/ai/suggestions/" class="btn btn-outline">Get Suggestions</a>
+            <a href="/ai/strategy/" class="btn btn-outline">Monthly Strategy</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

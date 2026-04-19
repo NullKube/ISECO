@@ -1,0 +1,412 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block extra_head %}
+<style>
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 12px;
+        font-weight: 500;
+        color: rgba(255,255,255,0.35);
+        text-decoration: none;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        margin-bottom: 36px;
+        transition: color 0.2s;
+    }
+
+    .back-link:hover { 
+        color: rgba(255,255,255,0.7); 
+    }
+
+    .page-title {
+        font-family: 'Syne', sans-serif;
+        font-size: 36px;
+        font-weight: 700;
+        color: #fff;
+        letter-spacing: -1px;
+        margin: 0 0 12px 0;
+        line-height: 1.1;
+    }
+
+    .section-label {
+        font-family: 'Syne', sans-serif;
+        font-size: 15px;
+        font-weight: 600;
+        color: #fff;
+        letter-spacing: -0.3px;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .section-label::before {
+        content: '';
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #f87171;
+        box-shadow: 0 0 8px #f87171;
+        flex-shrink: 0;
+        animation: blink 1.5s infinite;
+    }
+
+    @keyframes blink {
+        0%, 50% { opacity: 1; }
+        51%, 100% { opacity: 0.3; }
+    }
+
+    .alerts-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+        gap: 24px;
+        margin-bottom: 48px;
+    }
+
+    .alert-card {
+        background: rgba(255,255,255,0.025);
+        border: 2px solid rgba(248,113,113,0.3);
+        border-radius: 20px;
+        padding: 32px;
+        transition: all 0.2s;
+        backdrop-filter: blur(20px);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .alert-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #f87171, #ef4444);
+    }
+
+    .alert-card:hover {
+        border-color: rgba(248,113,113,0.5);
+        transform: translateY(-4px);
+        box-shadow: 0 20px 40px rgba(248,113,113,0.15);
+    }
+
+    .alert-icon {
+        font-size: 32px;
+        color: #f87171;
+        margin-bottom: 16px;
+        opacity: 0.9;
+    }
+
+    .alert-title {
+        font-family: 'Syne', sans-serif;
+        font-size: 20px;
+        font-weight: 700;
+        color: #fff;
+        letter-spacing: -0.3px;
+        margin-bottom: 12px;
+    }
+
+    .alert-category {
+        font-family: 'Syne', sans-serif;
+        font-size: 24px;
+        font-weight: 700;
+        color: #f87171;
+        letter-spacing: -0.4px;
+        margin-bottom: 8px;
+    }
+
+    .alert-percentage {
+        font-family: 'Syne', sans-serif;
+        font-size: 32px;
+        font-weight: 700;
+        color: #fff;
+        letter-spacing: -0.6px;
+        margin-bottom: 4px;
+    }
+
+    .alert-warning {
+        color: #f87171;
+        font-weight: 600;
+        font-size: 14px;
+    }
+
+    .alert-detail {
+        font-size: 15px;
+        color: rgba(255,255,255,0.75);
+        line-height: 1.6;
+        margin-bottom: 16px;
+    }
+
+    .alert-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: rgba(248,113,113,0.15);
+        color: #f87171;
+        border: 1px solid rgba(248,113,113,0.25);
+        border-radius: 100px;
+        font-size: 12px;
+        font-weight: 600;
+        padding: 6px 12px;
+    }
+
+    .ai-box {
+        background: rgba(74,222,128,0.04);
+        border: 1px solid rgba(74,222,128,0.12);
+        border-radius: 20px;
+        padding: 32px;
+        margin-bottom: 48px;
+        position: relative;
+    }
+
+    .ai-box::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #4ade80, #22c55e);
+    }
+
+    .ai-header {
+        font-family: 'Syne', sans-serif;
+        font-size: 15px;
+        font-weight: 600;
+        color: #4ade80;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .ai-heart {
+        font-size: 16px;
+        animation: heartbeat 1.5s ease-in-out infinite both;
+    }
+
+    @keyframes heartbeat {
+        0% { transform: scale(1); }
+        14% { transform: scale(1.3); }
+        28% { transform: scale(1); }
+        42% { transform: scale(1.3); }
+        70% { transform: scale(1); }
+    }
+
+    .ai-key-issue {
+        font-family: 'Syne', sans-serif;
+        font-size: 16px;
+        font-weight: 700;
+        color: #fff;
+        margin-bottom: 16px;
+        padding: 16px;
+        background: rgba(255,255,255,0.03);
+        border-radius: 12px;
+        border-left: 4px solid #4ade80;
+    }
+
+    .ai-section {
+        margin-bottom: 20px;
+    }
+
+    .ai-section-title {
+        font-weight: 600;
+        color: #4ade80;
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 8px;
+    }
+
+    .ai-content {
+        font-size: 14px;
+        color: rgba(255,255,255,0.8);
+        line-height: 1.7;
+    }
+
+    .ai-steps {
+        list-style: none;
+        padding: 0;
+    }
+
+    .ai-steps li {
+        padding: 12px 0;
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+        position: relative;
+        padding-left: 28px;
+    }
+
+    .ai-steps li::before {
+        content: '→';
+        position: absolute;
+        left: 0;
+        color: #4ade80;
+        font-weight: 700;
+        font-size: 14px;
+    }
+
+    .ai-steps li:last-child {
+        border-bottom: none;
+    }
+
+    .ai-action {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(74,222,128,0.12);
+        color: #4ade80;
+        border: 1px solid rgba(74,222,128,0.2);
+        padding: 12px 24px;
+        border-radius: 12px;
+        font-size: 13px;
+        font-weight: 600;
+        text-decoration: none;
+        margin-top: 20px;
+        transition: all 0.2s;
+    }
+
+    .ai-action:hover {
+        background: rgba(74,222,128,0.2);
+        transform: translateY(-1px);
+    }
+
+    .no-alerts-card {
+        background: rgba(255,255,255,0.025);
+        border: 2px solid rgba(74,222,128,0.3);
+        border-radius: 20px;
+        padding: 64px 48px;
+        text-align: center;
+        color: rgba(255,255,255,0.4);
+    }
+
+    .no-alerts-icon {
+        font-size: 64px;
+        margin-bottom: 24px;
+        opacity: 0.25;
+    }
+
+    .related-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 16px;
+    }
+
+    .related-btn {
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.07);
+        color: rgba(255,255,255,0.7);
+        padding: 16px 24px;
+        border-radius: 16px;
+        font-size: 14px;
+        font-weight: 500;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        transition: all 0.2s;
+        cursor: pointer;
+    }
+
+    .related-btn:hover {
+        background: rgba(255,255,255,0.08);
+        border-color: rgba(255,255,255,0.15);
+        color: #fff;
+        transform: translateY(-2px);
+    }
+
+    .arr {
+        font-size: 12px;
+        transition: transform 0.2s;
+    }
+
+    .related-btn:hover .arr {
+        transform: translateX(4px);
+    }
+
+    @media (max-width: 768px) {
+        .alerts-container {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<a href="/ai/engine/" class="back-link">← AI Engine</a>
+
+<h1 class="page-title">{{ page_title }}</h1>
+
+<div class="alerts-container">
+    {% if alerts %}
+        {% for alert_obj in alerts %}
+        <div class="alert-card">
+            <div class="alert-icon">⚠️</div>
+            <div class="alert-title">Overspending Detected</div>
+            <div class="alert-category">{{ alert_obj.category }}</div>
+            <div class="alert-percentage">{{ alert_obj.percentage }}%</div>
+            <div class="alert-warning">{{ alert_obj.message }}</div>
+            <div class="alert-badge">
+                {{ alert_obj.type|upper }} - {{ alert_obj.period }}
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+    <div class="no-alerts-card">
+        <div class="no-alerts-icon">✅</div>
+        <h2 style="color: rgba(255,255,255,0.6); margin-bottom: 16px;">No active alerts</h2>
+        <p style="font-size: 16px;">Your spending is perfectly balanced!</p>
+    </div>
+    {% endif %}
+</div>
+
+{% if ai_explanation %}
+<div class="ai-box">
+    <div class="ai-header">
+        <span class="ai-heart">♥</span>
+        AI Analysis
+    </div>
+    
+    <div class="ai-key-issue">
+        {{ ai_explanation|regex_replace:"\\*\\*(.*?)\\*\\*":"\\1" | slice:":150" }}...
+    </div>
+    
+    <div class="ai-section">
+        <div class="ai-section-title">Why This Matters</div>
+        <div class="ai-content">
+            High rent percentage indicates significant income allocation, limiting funds for savings and essentials.
+        </div>
+    </div>
+    
+    <div class="ai-section">
+        <div class="ai-section-title">What To Do Next</div>
+        <ul class="ai-steps">
+            <li>Review rent budget and explore roommate options</li>
+            <li>Prioritize essential expenses first</li>
+            <li>Build 3-6 months emergency fund</li>
+        </ul>
+    </div>
+    
+    <a href="/ai/clustering/" class="ai-action">
+        View Spending Clusters →
+    </a>
+</div>
+{% endif %}
+
+<div class="related-grid">
+    <a href="/ai/clustering/" class="related-btn">
+        Spending Clusters <span class="arr">→</span>
+    </a>
+    <a href="/ai/insights/" class="related-btn">
+        Behavioral Insights <span class="arr">→</span>
+    </a>
+    <a href="/expenses/" class="related-btn">
+        Track Expenses <span class="arr">→</span>
+    </a>
+</div>
+{% endblock %}

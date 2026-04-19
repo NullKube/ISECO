@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block title %}Monthly Strategy - ISECO{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <a href="/ai/engine/" class="back-link">&larr; Back to AI Engine</a>
+    <h1>Monthly Strategy</h1>
+    <p>Your personalized action plan for this month</p>
+</div>
+
+{% if ai_explanation %}
+<div class="ai-box">
+    <h3>AI Strategy Summary</h3>
+    <p>{{ ai_explanation }}</p>
+</div>
+{% endif %}
+
+<div class="card">
+    <h2>Action Plan</h2>
+    <div style="background: var(--bg); padding: 1rem; border-radius: 8px; font-family: monospace; white-space: pre-wrap; line-height: 1.8;">
+        {% for line in strategy_lines %}{{ line }}
+{% endfor %}
+    </div>
+</div>
+
+<div class="grid grid-3" style="margin-top: 1.5rem;">
+    <div class="card" style="text-align: center;">
+        <h3>Planning Tools</h3>
+        <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: 1rem;">
+            <a href="/ai/feasibility/multi/" class="btn btn-outline">Goal Feasibility</a>
+            <a href="/ai/suggestions/" class="btn btn-outline">Get Suggestions</a>
+            <a href="/goals/" class="btn btn-outline">Manage Goals</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

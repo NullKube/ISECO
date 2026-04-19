@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block title %}Category Breakdown — ISECO{% endblock %}
+{% block page_heading %}Category Breakdown{% endblock %}
+{% block page_subtitle %}Review expenses by category with a clean card-based layout.{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="list-card">
+        {% for item in categories %}
+        <article class="list-item">
+            <div class="list-item-title">
+                <div>
+                    <h3>{{ item.category }}</h3>
+                    <div class="list-item-meta">Total spent</div>
+                </div>
+                <span class="pill red">₹{{ item.total }}</span>
+            </div>
+        </article>
+        {% empty %}
+        <div class="empty-state">No expenses found for categories.</div>
+        {% endfor %}
+    </div>
+    <a class="action-btn action-outline" href="/analytics/summary/">Back to Summary</a>
+</div>
+{% endblock %}

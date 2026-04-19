@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block title %}{{ user.username }} — User Details{% endblock %}
+{% block page_heading %}User Details{% endblock %}
+{% block page_subtitle %}Review account details and activity information.{% endblock %}
+
+{% block content %}
+<div class="card">
+    <h2>{{ user.username }}</h2>
+    <div class="list-card">
+        <article class="list-item"><div class="list-item-meta"><strong>Username:</strong> {{ user.username }}</div></article>
+        <article class="list-item"><div class="list-item-meta"><strong>Created At:</strong> {{ user.created_at }}</div></article>
+    </div>
+    <a class="action-btn action-outline" href="/users/all/">Back to Users</a>
+</div>
+{% endblock %}

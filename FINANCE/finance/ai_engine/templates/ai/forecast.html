@@ -1,0 +1,393 @@
+﻿{% extends "base.html" %}
+
+{% block title %}Savings Forecast — ISECO{% endblock %}
+
+{% block extra_head %}
+<style>
+    .forecast-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+        margin-bottom: 40px;
+    }
+
+    .f-card {
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.07);
+        border-radius: 16px;
+        padding: 24px;
+        transition: transform 0.22s cubic-bezier(.22,.68,0,1.2), border-color 0.2s, background 0.2s;
+        cursor: default;
+    }
+
+    .f-card:hover {
+        transform: translateY(-4px);
+        border-color: rgba(255,255,255,0.14);
+        background: rgba(255,255,255,0.05);
+    }
+
+    .f-card-label {
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: rgba(255,255,255,0.3);
+        margin-bottom: 12px;
+    }
+
+    .f-card-value {
+        font-family: 'Syne', sans-serif;
+        font-size: 32px;
+        font-weight: 700;
+        letter-spacing: -1px;
+        color: #fff;
+        line-height: 1;
+        margin-bottom: 8px;
+    }
+
+    .f-card-value.small {
+        font-size: 22px;
+        letter-spacing: -0.5px;
+    }
+
+    .f-card-sub {
+        font-size: 12px;
+        color: rgba(255,255,255,0.35);
+        line-height: 1.6;
+        margin-top: 8px;
+    }
+
+    .f-card-sub span {
+        color: rgba(255,255,255,0.55);
+    }
+
+    .pill-green {
+        display: inline-block;
+        background: rgba(74,222,128,0.12);
+        color: #4ade80;
+        border: 1px solid rgba(74,222,128,0.2);
+        border-radius: 100px;
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        padding: 3px 10px;
+        margin-top: 10px;
+    }
+
+    .pill-red {
+        display: inline-block;
+        background: rgba(248,113,113,0.12);
+        color: #f87171;
+        border: 1px solid rgba(248,113,113,0.2);
+        border-radius: 100px;
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        padding: 3px 10px;
+        margin-top: 10px;
+    }
+
+    .pill-muted {
+        display: inline-block;
+        background: rgba(255,255,255,0.06);
+        color: rgba(255,255,255,0.4);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 100px;
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        padding: 3px 10px;
+        margin-top: 10px;
+    }
+
+    .section-block {
+        background: rgba(255,255,255,0.025);
+        border: 1px solid rgba(255,255,255,0.07);
+        border-radius: 20px;
+        padding: 28px 32px;
+        margin-bottom: 20px;
+        transition: border-color 0.2s;
+    }
+
+    .section-block:hover {
+        border-color: rgba(255,255,255,0.11);
+    }
+
+    .section-title {
+        font-family: 'Syne', sans-serif;
+        font-size: 15px;
+        font-weight: 600;
+        color: #fff;
+        letter-spacing: -0.3px;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .section-title-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #4ade80;
+        box-shadow: 0 0 8px #4ade80;
+        flex-shrink: 0;
+        animation: blink 1.5s infinite;
+    }
+
+    @keyframes blink {
+        0%, 50% { opacity: 1; }
+        51%, 100% { opacity: 0.3; }
+    }
+
+    .ai-box {
+        background: rgba(74,222,128,0.04);
+        border: 1px solid rgba(74,222,128,0.12);
+        border-radius: 20px;
+        padding: 28px 32px;
+        margin-bottom: 20px;
+        font-size: 14px;
+        line-height: 1.8;
+        color: rgba(255,255,255,0.65);
+        transition: border-color 0.2s, background 0.2s;
+    }
+
+    .ai-box:hover {
+        border-color: rgba(74,222,128,0.2);
+        background: rgba(74,222,128,0.06);
+    }
+
+    .ai-box-header {
+        font-family: 'Syne', sans-serif;
+        font-size: 13px;
+        font-weight: 600;
+        color: #4ade80;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .ai-heart {
+        font-size: 16px;
+        animation: heartbeat 1.5s ease-in-out infinite both;
+    }
+
+    @keyframes heartbeat {
+        0% {
+            transform: scale(1);
+        }
+        14% {
+            transform: scale(1.3);
+        }
+        28% {
+            transform: scale(1);
+        }
+        42% {
+            transform: scale(1.3);
+        }
+        70% {
+            transform: scale(1);
+        }
+    }
+
+    .row-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 16px 0;
+        border-bottom: 1px solid rgba(255,255,255,0.05);
+        transition: background 0.15s;
+        border-radius: 8px;
+        padding-left: 8px;
+        padding-right: 8px;
+        margin: 0 -8px;
+    }
+
+    .row-item:last-child { border-bottom: none; }
+
+    .row-item:hover { background: rgba(255,255,255,0.025); }
+
+    .row-left h4 {
+        font-size: 14px;
+        font-weight: 500;
+        color: rgba(255,255,255,0.85);
+        margin-bottom: 3px;
+    }
+
+    .row-left p {
+        font-size: 12px;
+        color: rgba(255,255,255,0.3);
+    }
+
+    .row-right {
+        text-align: right;
+        flex-shrink: 0;
+    }
+
+    .row-amount {
+        font-family: 'Syne', sans-serif;
+        font-size: 16px;
+        font-weight: 600;
+        letter-spacing: -0.3px;
+    }
+
+    .amount-pos { color: #4ade80; }
+    .amount-neg { color: #f87171; }
+
+    .row-cumul {
+        font-size: 11px;
+        color: rgba(255,255,255,0.25);
+        margin-top: 2px;
+    }
+
+    .hist-meta {
+        font-size: 12px;
+        color: rgba(255,255,255,0.3);
+        margin-top: 3px;
+    }
+
+    .trend-emoji { font-size: 14px; }
+
+    .back-action {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 12px;
+        font-weight: 500;
+        color: rgba(255,255,255,0.35);
+        text-decoration: none;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        margin-bottom: 36px;
+        transition: color 0.2s;
+    }
+
+    .back-action:hover { color: rgba(255,255,255,0.7); }
+
+    @media (max-width: 640px) {
+        .forecast-grid { grid-template-columns: 1fr; }
+        .section-block { padding: 20px; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<a href="/ai/engine/" class="back-action">&larr; AI Engine</a>
+
+<h1 class="page-title">Savings Forecast</h1>
+<p class="page-sub">{{ method|upper }} &nbsp;·&nbsp; Projection for the next {{ months }} months</p>
+
+<div class="forecast-grid">
+
+    {% if current_month %}
+    <div class="f-card">
+        <div class="f-card-label">This month</div>
+        <div class="f-card-value">₹{{ current_month.savings_mtd|floatformat:0 }}</div>
+        <div class="f-card-sub">
+            <span>{{ current_month.month }}</span><br>
+            Day {{ current_month.days_elapsed }} of {{ current_month.total_days }} &nbsp;·&nbsp; {{ current_month.progress_pct }}% done
+        </div>
+        <div class="f-card-sub" style="margin-top:6px;">
+            Inc ₹{{ current_month.income_mtd|floatformat:0 }} &nbsp;·&nbsp; Exp ₹{{ current_month.expense_mtd|floatformat:0 }}
+        </div>
+        {% if current_month.projected_month_end %}
+        <div class="pill-muted">Proj ₹{{ current_month.projected_month_end|floatformat:0 }}</div>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    {% if summary %}
+    <div class="f-card">
+        <div class="f-card-label">Monthly average</div>
+        <div class="f-card-value">₹{{ summary.average_monthly_savings|floatformat:0 }}</div>
+        <div class="f-card-sub">
+            Over <span>{{ summary.total_completed_months }}</span> completed months
+        </div>
+        {% if summary.highest_month %}
+        <div class="f-card-sub" style="margin-top:6px;">
+            Best: <span>{{ summary.highest_month.month }}</span><br>
+            ₹{{ summary.highest_month.savings|floatformat:0 }}
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <div class="f-card">
+        <div class="f-card-label">Model accuracy</div>
+        <div class="f-card-value small">{{ model_accuracy|default:"N/A" }}</div>
+        <div class="f-card-sub">{{ accuracy_interpretation|default:"—" }}</div>
+        {% if trend_message %}
+        <div class="f-card-sub" style="margin-top:8px; color:rgba(255,255,255,0.5);">{{ trend_message }}</div>
+        {% endif %}
+    </div>
+
+</div>
+
+{% if ai_explanation %}
+<div class="ai-box">
+    <div class="ai-box-header"><span class="ai-heart">&#x2665;</span>&nbsp; AI insight</div>
+    {{ ai_explanation }}
+</div>
+{% endif %}
+
+<div class="section-block">
+    <div class="section-title">
+        <div class="section-title-dot"></div>
+        Forecast timeline
+    </div>
+
+    {% for item in forecast %}
+    <div class="row-item">
+        <div class="row-left">
+            <h4>{{ item.month_name }}</h4>
+            <p><span class="trend-emoji">{{ item.trend_emoji }}</span> Month {{ item.month_offset }} of {{ months }}</p>
+        </div>
+        <div class="row-right">
+            <div class="row-amount {% if item.predicted_monthly_savings >= 0 %}amount-pos{% else %}amount-neg{% endif %}">
+                ₹{{ item.predicted_monthly_savings|floatformat:0 }}
+            </div>
+            <div class="row-cumul">Cumulative ₹{{ item.expected_cumulative_savings|floatformat:0 }}</div>
+        </div>
+    </div>
+    {% empty %}
+    <p style="font-size:13px; color:rgba(255,255,255,0.3); padding: 12px 0;">No forecast data available.</p>
+    {% endfor %}
+</div>
+
+{% if historical_breakdown %}
+<div class="section-block">
+    <div class="section-title">
+        <div class="section-title-dot"></div>
+        Historical performance
+    </div>
+
+    {% for item in historical_breakdown %}
+    <div class="row-item">
+        <div class="row-left">
+            <h4>{{ item.month }} &nbsp;<span style="font-size:14px;">{{ item.emoji }}</span></h4>
+            <p class="hist-meta">
+                Inc ₹{{ item.income|floatformat:0 }} &nbsp;·&nbsp; Exp ₹{{ item.expense|floatformat:0 }}
+            </p>
+            <p class="hist-meta">{{ item.status }}</p>
+        </div>
+        <div class="row-right">
+            <div class="row-amount {% if item.savings >= 0 %}amount-pos{% else %}amount-neg{% endif %}">
+                ₹{{ item.savings|floatformat:0 }}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<div class="related-grid">
+    <a href="/ai/monthly/" class="related-btn">Monthly Analysis <span class="arr">→</span></a>
+    <a href="/ai/engine/" class="related-btn">AI Engine <span class="arr">→</span></a>
+    <a href="/expenses/" class="related-btn">Expenses <span class="arr">→</span></a>
+</div>
+
+{% endblock %}

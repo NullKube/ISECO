@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block title %}Notifications — ISECO{% endblock %}
+{% block page_heading %}Notifications{% endblock %}
+{% block page_subtitle %}Track your alerts and stay updated with system messages.{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="list-card">
+        {% for n in notifications %}
+        <article class="list-item {% if 'invited you' in n.message %}group-invite-item{% endif %}">
+            <div class="list-item-title">
+                <div>
+                    <h3>{% if not n.is_read %}<strong>[NEW]</strong>{% endif %} {% if 'invited you' in n.message %}Group Invite{% else %}Notification{% endif %}</h3>
+                    <div class="list-item-meta">{{ n.created_at }}</div>
+                </div>
+                {% if 'invited you' in n.message and '/groups/invite/' in n.link %}
+                    {% with invite_id=n.link|regex_replace:"/.*invite/([0-9]+)/.*/":"\\1" %}
+                    <div class="invite-actions">
+                        <button class="action-btn action-blue" onclick="respondToInvite({{ invite_id }}, 'accept')">Accept</button>
+                        <button class="action-btn action-outline" onclick="respondToInvite({{ invite_id }}, 'decline')">Decline</button>
+                    </div>
+                    {% endwith %}
+                {% else %}
+                    <a class="action-btn action-outline" href="/notifications/{{ n.id }}/view/">Open</a>
+                {% endif %}
+            </div>
+            <p class="list-item-meta">{{ n.message }}</p>
+        </article>
+        {% empty %}
+        <div class="empty-state">You have no notifications right now.</div>
+        {% endfor %}
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_head %}
+<style>
+    .group-invite-item {
+        background: rgba(59,91,219,0.1) !important;
+        border-color: rgba(59,91,219,0.3) !important;
+    }
+
+    .group-invite-item:hover {
+        background: rgba(59,91,219,0.15) !important;
+    }
+
+    .invite-actions {
+        display: flex;
+        gap: 8px;
+        flex-shrink: 0;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function respondToInvite(inviteId, action) {
+    if (!confirm(`Are you sure you want to ${action} this invitation?`)) {
+        return;
+    }
+
+    fetch(`/groups/api/invite/${inviteId}/respond/`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': getCookie('csrftoken'),
+        },
+        body: JSON.stringify({
+            action: action,
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.message);
+            location.reload();
+        } else {
+            alert('Error: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Failed to respond to invitation');
+    });
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+</script>
+{% endblock %}

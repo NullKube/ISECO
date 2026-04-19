@@ -1,0 +1,393 @@
+{% extends "base.html" %}
+
+{% block title %}Transactions{% endblock %}
+
+{% block extra_head %}
+<style>
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 12px;
+        font-weight: 500;
+        color: rgba(255,255,255,0.35);
+        text-decoration: none;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        margin-bottom: 36px;
+        transition: color 0.2s;
+    }
+
+    .back-link:hover { 
+        color: rgba(255,255,255,0.7); 
+    }
+
+    .page-title {
+        font-family: 'Syne', sans-serif;
+        font-size: 36px;
+        font-weight: 700;
+        color: #fff;
+        letter-spacing: -1px;
+        margin: 0 0 12px 0;
+        line-height: 1.1;
+    }
+
+    .page-subtitle {
+        font-size: 16px;
+        color: rgba(255,255,255,0.6);
+        margin: 0 0 48px 0;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 20px;
+        margin-bottom: 48px;
+    }
+
+    .stat-card {
+        background: rgba(255,255,255,0.025);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 20px;
+        padding: 32px;
+        backdrop-filter: blur(20px);
+        transition: all 0.3s;
+        text-align: center;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-4px);
+        border-color: rgba(255,255,255,0.15);
+        box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+    }
+
+    .stat-icon {
+        font-size: 32px;
+        margin-bottom: 16px;
+        opacity: 0.8;
+    }
+
+    .stat-label {
+        font-family: 'Syne', sans-serif;
+        font-size: 13px;
+        font-weight: 600;
+        color: rgba(255,255,255,0.6);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin-bottom: 8px;
+    }
+
+    .stat-value {
+        font-family: 'Syne', sans-serif;
+        font-size: 28px;
+        font-weight: 800;
+        color: #fff;
+        letter-spacing: -0.5px;
+    }
+
+    .transactions-container {
+        background: rgba(255,255,255,0.02);
+        border: 1px solid rgba(255,255,255,0.06);
+        border-radius: 24px;
+        padding: 40px;
+        margin-bottom: 32px;
+    }
+
+    .transactions-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 32px;
+        flex-wrap: wrap;
+        gap: 16px;
+    }
+
+    .section-title {
+        font-family: 'Syne', sans-serif;
+        font-size: 20px;
+        font-weight: 700;
+        color: #fff;
+        letter-spacing: -0.3px;
+    }
+
+    .add-btn {
+        background: linear-gradient(135deg, #f59e0b, #d97706);
+        color: white;
+        border: none;
+        padding: 16px 32px;
+        border-radius: 20px;
+        font-family: 'Syne', sans-serif;
+        font-size: 15px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s;
+        letter-spacing: -0.02em;
+        box-shadow: 0 10px 30px rgba(245,158,11,0.3);
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .add-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 20px 40px rgba(245,158,11,0.4);
+    }
+
+    .transaction-list {
+        max-height: 800px;
+        overflow-y: auto;
+    }
+
+    .transaction-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 24px;
+        background: rgba(255,255,255,0.015);
+        border: 1px solid rgba(255,255,255,0.05);
+        border-radius: 20px;
+        margin-bottom: 16px;
+        transition: all 0.3s;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .transaction-item::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 4px;
+        background: linear-gradient(180deg, #4ade80, #22c55e);
+    }
+
+    .transaction-item.income::before {
+        background: linear-gradient(180deg, #4ade80, #22c55e);
+    }
+
+    .transaction-item.expense::before {
+        background: linear-gradient(180deg, #f87171, #ef4444);
+    }
+
+    .transaction-item:hover {
+        background: rgba(255,255,255,0.03);
+        transform: translateX(8px);
+        border-color: rgba(255,255,255,0.1);
+        box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+    }
+
+    .transaction-content {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-right: 20px;
+    }
+
+    .transaction-category {
+        font-family: 'Syne', sans-serif;
+        font-size: 20px;
+        font-weight: 700;
+        color: #fff;
+        letter-spacing: -0.3px;
+    }
+
+    .transaction-meta {
+        display: flex;
+        gap: 20px;
+        font-size: 14px;
+        color: rgba(255,255,255,0.6);
+    }
+
+    .transaction-amount {
+        font-family: 'Syne', sans-serif;
+        font-size: 24px;
+        font-weight: 800;
+        padding: 12px 20px;
+        border-radius: 16px;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .transaction-amount.income {
+        background: rgba(74,222,128,0.15);
+        color: #4ade80;
+        border: 1px solid rgba(74,222,128,0.3);
+    }
+
+    .transaction-amount.expense {
+        background: rgba(248,113,113,0.15);
+        color: #f87171;
+        border: 1px solid rgba(248,113,113,0.3);
+    }
+
+    .transaction-description {
+        font-size: 13px;
+        color: rgba(255,255,255,0.4);
+        margin-top: 4px;
+    }
+
+    .view-btn {
+        background: rgba(255,255,255,0.1);
+        color: rgba(255,255,255,0.8);
+        border: 1px solid rgba(255,255,255,0.2);
+        padding: 12px 24px;
+        border-radius: 16px;
+        font-family: 'Syne', sans-serif;
+        font-size: 13px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.3s;
+        white-space: nowrap;
+    }
+
+    .view-btn:hover {
+        background: rgba(255,255,255,0.2);
+        color: #fff;
+        transform: translateY(-2px);
+    }
+
+    .empty-state {
+        background: rgba(255,255,255,0.025);
+        border: 2px dashed rgba(255,255,255,0.2);
+        border-radius: 24px;
+        padding: 80px 40px;
+        text-align: center;
+        color: rgba(255,255,255,0.4);
+    }
+
+    .empty-icon {
+        font-size: 64px;
+        margin-bottom: 24px;
+        opacity: 0.2;
+    }
+
+    @media (max-width: 768px) {
+        .transactions-container {
+            padding: 24px 20px;
+        }
+        
+        .transaction-item {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 16px;
+        }
+        
+        .transaction-amount {
+            order: -1;
+            align-self: flex-start;
+        }
+        
+        .stats-grid {
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+        }
+    }
+
+    /* Custom Scrollbar */
+    .transaction-list::-webkit-scrollbar {
+        width: 8px;
+    }
+
+    .transaction-list::-webkit-scrollbar-track {
+        background: rgba(255,255,255,0.02);
+        border-radius: 10px;
+    }
+
+    .transaction-list::-webkit-scrollbar-thumb {
+        background: rgba(255,255,255,0.2);
+        border-radius: 10px;
+    }
+
+    .transaction-list::-webkit-scrollbar-thumb:hover {
+        background: rgba(255,255,255,0.3);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<a href="/dashboard/" class="back-link">← Dashboard</a>
+
+<h1 class="page-title">Transactions</h1>
+<p class="page-subtitle">Review income and expense history in glassmorphism perfection.</p>
+
+<!-- Stats Cards -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <div class="stat-icon">📊</div>
+        <div class="stat-label">Total Transactions</div>
+        <div class="stat-value">{{ expenses|length }}</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">💰</div>
+        <div class="stat-label">Total Income</div>
+        <div class="stat-value">
+            ₹{{ income_total|floatformat:0 }}
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">💸</div>
+        <div class="stat-label">Total Expenses</div>
+        <div class="stat-value">
+            ₹{{ expense_total|floatformat:0 }}
+        </div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-icon">📈</div>
+        <div class="stat-label">Net Savings</div>
+        <div class="stat-value" style="color: #4ade80;">
+            ₹{{ net_savings|floatformat:0 }}
+        </div>
+    </div>
+</div>
+
+<div class="transactions-container">
+    <div class="transactions-header">
+        <h2 class="section-title">Recent Transactions</h2>
+        <a href="/expenses/add/" class="add-btn">
+            ➕ Add Transaction
+        </a>
+    </div>
+
+    {% if expenses %}
+    <div class="transaction-list">
+        {% for exp in expenses %}
+        <div class="transaction-item {% if exp.type == 'income' %}income{% else %}expense{% endif %}">
+            <div class="transaction-amount {% if exp.type == 'income' %}income{% else %}expense{% endif %}">
+                ₹{{ exp.amount|floatformat:0 }}
+            </div>
+            
+            <div class="transaction-content">
+                <div class="transaction-category">{{ exp.category }}</div>
+                <div class="transaction-meta">
+                    <span>{{ exp.date }}</span>
+                    <span>{{ exp.get_type_display }}</span>
+                </div>
+                {% if exp.description %}
+                <div class="transaction-description">
+                    {{ exp.description|truncatechars:60 }}
+                </div>
+                {% endif %}
+            </div>
+            
+            <a href="/expenses/{{ exp.id }}/view/" class="view-btn">
+                View Details
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <div class="empty-icon">📝</div>
+        <h3 style="color: rgba(255,255,255,0.6); margin-bottom: 12px;">No transactions yet</h3>
+        <p style="font-size: 16px; margin-bottom: 32px;">Get started by adding your first transaction.</p>
+        <a href="/expenses/add/" class="add-btn" style="padding: 16px 40px;">
+            ➕ Add First Transaction
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

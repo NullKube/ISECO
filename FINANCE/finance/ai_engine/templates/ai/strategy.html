@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>{{ page_title }}</h2>
+
+    {% if strategy_lines %}
+        <div class="card mt-3">
+            <div class="card-body">
+                <ul class="list-unstyled">
+                    {% for line in strategy_lines %}
+                        <li class="mb-2">{{ line }}</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    {% endif %}
+
+    {% if ai_explanation %}
+        <div class="card mt-4">
+            <div class="card-header">AI Analysis</div>
+            <div class="card-body">
+                <p>{{ ai_explanation }}</p>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

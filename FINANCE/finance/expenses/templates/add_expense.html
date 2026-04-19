@@ -1,0 +1,343 @@
+{% extends "base.html" %}
+
+{% block title %}Add Transaction{% endblock %}
+
+{% block extra_head %}
+<style>
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 12px;
+        font-weight: 500;
+        color: rgba(255,255,255,0.35);
+        text-decoration: none;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        margin-bottom: 36px;
+        transition: color 0.2s;
+    }
+
+    .back-link:hover { 
+        color: rgba(255,255,255,0.7); 
+    }
+
+    .page-title {
+        font-family: 'Syne', sans-serif;
+        font-size: 36px;
+        font-weight: 700;
+        color: #fff;
+        letter-spacing: -1px;
+        margin: 0 0 12px 0;
+        line-height: 1.1;
+    }
+
+    .page-subtitle {
+        font-size: 16px;
+        color: rgba(255,255,255,0.6);
+        margin: 0 0 48px 0;
+    }
+
+    .form-container {
+        background: rgba(255,255,255,0.025);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 24px;
+        padding: 48px;
+        backdrop-filter: blur(20px);
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    .upload-section, .manual-section {
+        background: rgba(255,255,255,0.015);
+        border: 2px dashed rgba(255,255,255,0.2);
+        border-radius: 20px;
+        padding: 40px;
+        text-align: center;
+        transition: all 0.3s;
+        margin-bottom: 32px;
+        position: relative;
+    }
+
+    .upload-section:hover, .manual-section:hover {
+        border-color: rgba(74,222,128,0.4);
+        background: rgba(74,222,128,0.03);
+    }
+
+    .upload-section::before {
+        content: 'OR';
+        position: absolute;
+        top: -16px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(255,255,255,0.025);
+        color: rgba(255,255,255,0.5);
+        padding: 4px 24px;
+        border-radius: 20px;
+        font-size: 13px;
+        font-weight: 600;
+    }
+
+    .upload-icon {
+        font-size: 48px;
+        background: linear-gradient(135deg, #4ade80, #22c55e);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 20px;
+    }
+
+    .section-title {
+        font-family: 'Syne', sans-serif;
+        font-size: 20px;
+        font-weight: 700;
+        color: #fff;
+        margin-bottom: 16px;
+        letter-spacing: -0.3px;
+    }
+
+    .csv-hint {
+        font-size: 13px;
+        color: rgba(255,255,255,0.6);
+        margin-top: 12px;
+    }
+
+    .form-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 24px;
+    }
+
+    .form-group {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .form-label {
+        font-family: 'Syne', sans-serif;
+        font-size: 13px;
+        font-weight: 600;
+        color: rgba(255,255,255,0.8);
+        margin-bottom: 8px;
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+    }
+
+    .form-input, .form-select {
+        background: rgba(255,255,255,0.1);
+        border: 1px solid rgba(255,255,255,0.2);
+        border-radius: 16px;
+        padding: 16px 20px;
+        font-size: 16px;
+        color: #fff;
+        backdrop-filter: blur(10px);
+        transition: all 0.3s;
+    }
+
+    .form-input::placeholder {
+        color: rgba(255,255,255,0.4);
+    }
+
+    .form-input:focus, .form-select:focus {
+        outline: none;
+        border-color: #4ade80;
+        box-shadow: 0 0 0 4px rgba(74,222,128,0.1);
+        background: rgba(255,255,255,0.15);
+    }
+
+    .file-input-wrapper {
+        position: relative;
+        overflow: hidden;
+        display: inline-block;
+        width: 100%;
+    }
+
+    .file-input-wrapper input[type=file] {
+        position: absolute;
+        left: -9999px;
+    }
+
+    .file-input-label {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: linear-gradient(135deg, rgba(74,222,128,0.1), rgba(34,197,94,0.1));
+        border: 2px dashed rgba(74,222,128,0.3);
+        border-radius: 16px;
+        padding: 24px;
+        cursor: pointer;
+        transition: all 0.3s;
+        color: rgba(255,255,255,0.8);
+    }
+
+    .file-input-label:hover {
+        background: linear-gradient(135deg, rgba(74,222,128,0.2), rgba(34,197,94,0.2));
+        border-color: #4ade80;
+    }
+
+    .file-icon {
+        font-size: 32px;
+        margin-bottom: 12px;
+    }
+
+    .button-row {
+        grid-column: 1 / -1;
+        display: flex;
+        gap: 16px;
+        justify-content: center;
+        padding-top: 32px;
+        border-top: 1px solid rgba(255,255,255,0.1);
+    }
+
+    .submit-btn {
+        background: linear-gradient(135deg, #4ade80, #22c55e);
+        color: white;
+        border: none;
+        padding: 20px 48px;
+        border-radius: 20px;
+        font-family: 'Syne', sans-serif;
+        font-size: 16px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s;
+        letter-spacing: -0.02em;
+        box-shadow: 0 10px 30px rgba(74,222,128,0.3);
+    }
+
+    .submit-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 20px 40px rgba(74,222,128,0.4);
+    }
+
+    .cancel-btn {
+        background: transparent;
+        color: rgba(255,255,255,0.7);
+        border: 1px solid rgba(255,255,255,0.2);
+        padding: 20px 32px;
+        border-radius: 20px;
+        font-family: 'Syne', sans-serif;
+        font-size: 16px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.3s;
+    }
+
+    .cancel-btn:hover {
+        background: rgba(255,255,255,0.08);
+        color: #fff;
+        border-color: rgba(255,255,255,0.3);
+        transform: translateY(-2px);
+    }
+
+    .notification {
+        grid-column: 1 / -1;
+        padding: 20px;
+        border-radius: 16px;
+        margin-bottom: 24px;
+        font-weight: 500;
+    }
+
+    .notification-success {
+        background: rgba(74,222,128,0.15);
+        border: 1px solid rgba(74,222,128,0.3);
+        color: #4ade80;
+    }
+
+    .notification-danger {
+        background: rgba(248,113,113,0.15);
+        border: 1px solid rgba(248,113,113,0.3);
+        color: #f87171;
+    }
+
+    @media (max-width: 768px) {
+        .form-container {
+            padding: 32px 24px;
+            margin: 0 16px;
+        }
+        
+        .form-grid {
+            grid-template-columns: 1fr;
+            gap: 20px;
+        }
+        
+        .button-row {
+            flex-direction: column;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<a href="/expenses/" class="back-link">← Expenses</a>
+
+<h1 class="page-title">Add Transaction</h1>
+<p class="page-subtitle">Track income and expenses with glassmorphism perfection.</p>
+
+<div class="form-container">
+    <form method="POST" enctype="multipart/form-data" class="form-grid">
+        {% csrf_token %}
+
+        {% if message %}
+        <div class="notification {% if 'failed' in message|lower or 'error' in message|lower or 'skipped' in message|lower %}notification-danger{% else %}notification-success{% endif %}">
+            {{ message }}
+        </div>
+        {% endif %}
+
+        <!-- CSV Upload Section -->
+        <div class="upload-section">
+            <div class="upload-icon">📊</div>
+            <div class="section-title">Upload CSV File</div>
+            <div class="file-input-wrapper">
+                <input class="form-input" type="file" name="csv_file" accept=".csv">
+                <label for="csv_file" class="file-input-label">
+                    <div class="file-icon">📁</div>
+                    <div style="font-weight: 600; margin-bottom: 4px;">Choose CSV File</div>
+                    <div style="font-size: 13px; opacity: 0.7;">Columns: amount, category, type, date</div>
+                </label>
+            </div>
+            <div class="csv-hint">Bulk import your transactions instantly</div>
+        </div>
+
+        <!-- Manual Entry Section -->
+        <div class="manual-section">
+            <div class="upload-icon">✏️</div>
+            <div class="section-title">Manual Entry</div>
+            
+            <div class="form-grid" style="margin-top: 24px;">
+                <div class="form-group">
+                    <label class="form-label">Amount</label>
+                    <input class="form-input" type="number" name="amount" step="0.01" placeholder="₹5000">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Category</label>
+                    <input class="form-input" type="text" name="category" placeholder="Rent, Salary, Groceries">
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Type</label>
+                    <select class="form-select" name="type">
+                        <option value="income">Income</option>
+                        <option value="expense" selected>Expense</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Date</label>
+                    <input class="form-input" type="date" name="date">
+                </div>
+            </div>
+        </div>
+
+        <div class="button-row">
+            <button class="submit-btn" type="submit">
+                Add Transaction
+            </button>
+            <a href="/expenses/" class="cancel-btn">
+                Cancel
+            </a>
+        </div>
+    </form>
+</div>
+{% endblock %}

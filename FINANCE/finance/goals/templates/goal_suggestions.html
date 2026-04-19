@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+
+{% block title %}AI Goal Suggestions — ISECO{% endblock %}
+{% block page_heading %}AI Goal Suggestions{% endblock %}
+{% block page_subtitle %}Personalized goal planning recommendations in the unified dashboard layout.{% endblock %}
+
+{% block content %}
+<div class="card" style="margin-bottom: 1.5rem;">
+    <div class="button-row" style="gap: 10px; flex-wrap: wrap;">
+        <a class="action-btn action-outline" href="/goals/list/">Back to Goals</a>
+        <a class="action-btn action-teal" href="/goals/add/">Add goal</a>
+        <a class="action-btn action-blue" href="/goals/suggestions/">Refresh</a>
+    </div>
+</div>
+<div class="list-card">
+    {% if suggestions %}
+        {% for suggestion in suggestions %}
+        <article class="list-item">
+            <div class="list-item-title">
+                <div>
+                    <h3>{{ suggestion.goal_name }}</h3>
+                    <div class="list-item-meta">{{ suggestion.status|default:'Unknown'|capfirst }}</div>
+                </div>
+                <span class="pill {% if suggestion.status == 'feasible' %}green{% else %}red{% endif %}">{{ suggestion.status|default:'Unknown'|capfirst }}</span>
+            </div>
+            <div class="list-item-meta">Saved ₹{{ suggestion.amount_saved|floatformat:0 }} · Target ₹{{ suggestion.target_amount|floatformat:0 }}</div>
+            <div class="list-item-meta">Remaining: ₹{{ suggestion.remaining|floatformat:0 }}</div>
+            <div class="list-item-meta">Months left: {{ suggestion.months_left }}</div>
+            <div class="list-item-meta">Required / month: ₹{{ suggestion.required_per_month|floatformat:0 }}</div>
+        </article>
+        {% endfor %}
+    {% else %}
+        <div class="empty-state">No suggestions available yet. Add goals or update expenses to receive recommendations.</div>
+    {% endif %}
+</div>
+{% endblock %}

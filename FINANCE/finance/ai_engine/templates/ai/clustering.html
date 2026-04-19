@@ -1,0 +1,382 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block extra_head %}
+<style>
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 12px;
+        font-weight: 500;
+        color: rgba(255,255,255,0.35);
+        text-decoration: none;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        margin-bottom: 36px;
+        transition: color 0.2s;
+    }
+
+    .back-link:hover { 
+        color: rgba(255,255,255,0.7); 
+    }
+
+    .page-title {
+        font-family: 'Syne', sans-serif;
+        font-size: 36px;
+        font-weight: 700;
+        color: #fff;
+        letter-spacing: -1px;
+        margin: 0 0 12px 0;
+        line-height: 1.1;
+    }
+
+    .page-sub {
+        font-size: 15px;
+        color: rgba(255,255,255,0.5);
+        margin: 0 0 48px 0;
+        font-weight: 400;
+    }
+
+    .section-label {
+        font-family: 'Syne', sans-serif;
+        font-size: 15px;
+        font-weight: 600;
+        color: #fff;
+        letter-spacing: -0.3px;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .section-label::before {
+        content: '';
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #4ade80;
+        box-shadow: 0 0 8px #4ade80;
+        flex-shrink: 0;
+        animation: blink 1.5s infinite;
+    }
+
+    @keyframes blink {
+        0%, 50% { opacity: 1; }
+        51%, 100% { opacity: 0.3; }
+    }
+
+    .clusters-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+        gap: 24px;
+        margin-bottom: 48px;
+    }
+
+    .cluster-card {
+        background: rgba(255,255,255,0.025);
+        border: 1px solid rgba(255,255,255,0.07);
+        border-radius: 20px;
+        padding: 32px;
+        transition: all 0.2s;
+        height: 100%;
+        backdrop-filter: blur(20px);
+    }
+
+    .cluster-card:hover {
+        border-color: rgba(255,255,255,0.11);
+        transform: translateY(-4px);
+    }
+
+    .cluster-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 24px;
+        gap: 16px;
+    }
+
+    .cluster-name {
+        font-family: 'Syne', sans-serif;
+        font-size: 22px;
+        font-weight: 700;
+        color: #fff;
+        letter-spacing: -0.5px;
+        flex: 1;
+    }
+
+    .cluster-type {
+        display: inline-block;
+        background: rgba(74,222,128,0.12);
+        color: #4ade80;
+        border: 1px solid rgba(74,222,128,0.2);
+        border-radius: 100px;
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        padding: 4px 12px;
+        white-space: nowrap;
+    }
+
+    .cluster-insight {
+        font-size: 13px;
+        color: rgba(255,255,255,0.45);
+        line-height: 1.6;
+        margin-bottom: 24px;
+        font-style: italic;
+    }
+
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+        margin-bottom: 24px;
+    }
+
+    .stat-item {
+        text-align: center;
+        padding: 16px 12px;
+        background: rgba(255,255,255,0.03);
+        border-radius: 12px;
+        border: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .stat-label {
+        font-size: 11px;
+        color: rgba(255,255,255,0.4);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 4px;
+        font-weight: 600;
+    }
+
+    .stat-value {
+        font-family: 'Syne', sans-serif;
+        font-size: 20px;
+        font-weight: 700;
+        color: #fff;
+        letter-spacing: -0.3px;
+    }
+
+    .expenses-toggle {
+        width: 100%;
+        background: rgba(74,222,128,0.08);
+        border: 1px solid rgba(74,222,128,0.15);
+        color: #4ade80;
+        padding: 12px 16px;
+        border-radius: 12px;
+        font-size: 13px;
+        font-weight: 500;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.2s;
+        margin-bottom: 8px;
+    }
+
+    .expenses-toggle:hover {
+        background: rgba(74,222,128,0.15);
+        transform: translateY(-1px);
+    }
+
+    .expenses-list {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease;
+        background: rgba(255,255,255,0.02);
+        border-radius: 12px;
+        padding: 0 4px;
+    }
+
+    .expenses-list.active {
+        max-height: 400px;
+        padding: 16px 4px;
+        border: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .expense-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 0;
+        border-bottom: 1px solid rgba(255,255,255,0.03);
+        font-size: 13px;
+    }
+
+    .expense-item:last-child {
+        border-bottom: none;
+    }
+
+    .expense-category {
+        color: rgba(255,255,255,0.7);
+        font-weight: 500;
+    }
+
+    .expense-amount {
+        font-family: 'Syne', sans-serif;
+        font-weight: 600;
+        color: #f87171;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 64px 32px;
+        color: rgba(255,255,255,0.3);
+    }
+
+    .empty-icon {
+        font-size: 48px;
+        margin-bottom: 16px;
+        opacity: 0.2;
+    }
+
+    @media (max-width: 768px) {
+        .clusters-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+        
+        .cluster-card {
+            padding: 24px;
+        }
+    }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const toggles = document.querySelectorAll('.expenses-toggle');
+    toggles.forEach(toggle => {
+        toggle.addEventListener('click', function() {
+            const list = this.nextElementSibling;
+            const icon = this.querySelector('.toggle-icon');
+            
+            list.classList.toggle('active');
+            if (icon) {
+                icon.textContent = list.classList.contains('active') ? '−' : '+';
+            }
+        });
+    });
+});
+</script>
+{% endblock %}
+
+{% block content %}
+<a href="/ai/engine/" class="back-link">← AI Engine</a>
+
+<h1 class="page-title" style="margin-bottom: 60px;">{{ page_title }}</h1>
+
+
+<div class="clusters-grid">
+    {% if clusters %}
+        {% if method == "k_means" %}
+            {% for cluster_name, cluster_data in clusters.items %}
+            <div class="cluster-card">
+                <div class="cluster-header">
+                    <div class="cluster-name">{{ cluster_name }}</div>
+                    <span class="cluster-type">{{ cluster_data.type }}</span>
+                </div>
+                
+                <p class="cluster-insight">{{ cluster_data.insight }}</p>
+                
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-label">Transactions</div>
+                        <div class="stat-value">{{ cluster_data.count }}</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Total Amount</div>
+                        <div class="stat-value">₹{{ cluster_data.total_amount|floatformat:0 }}</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Avg Amount</div>
+                        <div class="stat-value">₹{{ cluster_data.avg_amount|floatformat:0 }}</div>
+                    </div>
+                </div>
+
+                {% if cluster_data.expenses %}
+                <button class="expenses-toggle">
+                    + View {{ cluster_data.expenses|length }} sample expenses
+                </button>
+                <div class="expenses-list">
+                    {% for exp in cluster_data.expenses %}
+                    <div class="expense-item">
+                        <span class="expense-category">{{ exp.category|default:"Uncategorized" }}</span>
+                        <span class="expense-amount">₹{{ exp.amount|floatformat:0 }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+
+        {% elif method == "simple_bucketing" %}
+            {% for bucket_name, bucket in clusters.items %}
+            <div class="cluster-card">
+                <div class="cluster-header">
+                    <div class="cluster-name">{{ bucket_name }} Spenders</div>
+                    <span class="cluster-type">{{ bucket.count }} items</span>
+                </div>
+                
+                {% if bucket.expenses %}
+                <p class="cluster-insight">
+                    {% if bucket_name == 'High' %}
+                        Transactions ≥ ₹5,000
+                    {% elif bucket_name == 'Medium' %}
+                        Transactions ₹1,000 - ₹5,000
+                    {% else %}
+                        Transactions < ₹1,000
+                    {% endif %}
+                </p>
+
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-label">Expenses</div>
+                        <div class="stat-value">{{ bucket.count }}</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Total Amount</div>
+                        <div class="stat-value">₹{{ bucket.total_amount|floatformat:0 }}</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-label">Avg Amount</div>
+                        <div class="stat-value">₹{{ bucket.avg_amount|floatformat:0 }}</div>
+                    </div>
+                </div>
+
+                <button class="expenses-toggle">
+                    + View {{ bucket.count }} expenses
+                </button>
+                <div class="expenses-list">
+                    {% for exp in bucket.expenses|slice:":10" %}
+                    <div class="expense-item">
+                        <span class="expense-category">{{ exp.category|default:"Uncategorized" }}</span>
+                        <span class="expense-amount">₹{{ exp.amount|floatformat:0 }}</span>
+                    </div>
+                    {% endfor %}
+                    {% if bucket.count > 10 %}
+                    <div class="expense-item">
+                        <span class="expense-category" style="color: rgba(255,255,255,0.4);">... and {{ bucket.count|add:"-10" }} more</span>
+                    </div>
+                    {% endif %}
+                </div>
+                {% else %}
+                <div class="empty-state">
+                    <div class="empty-icon">⊘</div>
+                    <p>No expenses in this bucket.</p>
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        {% endif %}
+    {% else %}
+    <div class="cluster-card" style="text-align: center; padding: 64px 32px;">
+        <div class="empty-icon">📊</div>
+        <h3 style="color: rgba(255,255,255,0.5); margin: 16px 0;">No clusters found</h3>
+        <p style="color: rgba(255,255,255,0.3);">Add more expense data to see spending patterns.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

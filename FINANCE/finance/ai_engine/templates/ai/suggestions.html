@@ -1,0 +1,270 @@
+{% extends "base.html" %}
+{% block title %}Smart Suggestions - ISECO{% endblock %}
+
+{% block extra_head %}
+<style>
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 12px;
+        font-weight: 500;
+        color: rgba(255,255,255,0.35);
+        text-decoration: none;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        margin-bottom: 36px;
+        transition: color 0.2s;
+    }
+
+    .back-link:hover { 
+        color: rgba(255,255,255,0.7); 
+    }
+
+    .page-title {
+        font-family: 'Syne', sans-serif;
+        font-size: 36px;
+        font-weight: 700;
+        color: #fff;
+        letter-spacing: -1px;
+        margin: 0 0 12px 0;
+        line-height: 1.1;
+    }
+
+    .page-sub {
+        font-size: 15px;
+        color: rgba(255,255,255,0.5);
+        margin: 0 0 48px 0;
+        font-weight: 400;
+    }
+
+    .section-label {
+        font-family: 'Syne', sans-serif;
+        font-size: 15px;
+        font-weight: 600;
+        color: #fff;
+        letter-spacing: -0.3px;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .section-label::before {
+        content: '';
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #4ade80;
+        box-shadow: 0 0 8px #4ade80;
+        flex-shrink: 0;
+        animation: blink 1.5s infinite;
+    }
+
+    @keyframes blink {
+        0%, 50% { opacity: 1; }
+        51%, 100% { opacity: 0.3; }
+    }
+
+    .goals-card, .insights-card {
+        background: rgba(255,255,255,0.025);
+        border: 1px solid rgba(255,255,255,0.07);
+        border-radius: 20px;
+        padding: 32px;
+        margin-bottom: 32px;
+        transition: border-color 0.2s;
+    }
+
+    .goals-card:hover, .insights-card:hover {
+        border-color: rgba(255,255,255,0.11);
+    }
+
+    .no-goals-state {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 48px 24px;
+        text-align: center;
+        color: rgba(255,255,255,0.4);
+    }
+
+    .no-goals-icon {
+        font-size: 56px;
+        margin-bottom: 20px;
+        opacity: 0.25;
+    }
+
+    .no-goals-text {
+        font-size: 16px;
+        line-height: 1.6;
+        max-width: 320px;
+    }
+
+    .insights-timeline {
+        position: relative;
+        padding: 24px 0;
+    }
+
+    .timeline-line {
+        position: absolute;
+        left: 12px;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: #4ade80;
+    }
+
+    .timeline-point {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 20px 0;
+        position: relative;
+        z-index: 2;
+    }
+
+    .timeline-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: #4ade80;
+        flex-shrink: 0;
+    }
+
+    .insight-content {
+        flex: 1;
+        padding-left: 12px;
+    }
+
+    .insight-title {
+        font-size: 14px;
+        font-weight: 500;
+        color: rgba(255,255,255,0.85);
+        margin-bottom: 4px;
+    }
+
+    .insight-detail {
+        font-size: 13px;
+        color: rgba(255,255,255,0.45);
+    }
+
+    .related-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+        gap: 16px;
+        margin-top: 24px;
+    }
+
+    .related-btn {
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.07);
+        color: rgba(255,255,255,0.7);
+        padding: 16px 24px;
+        border-radius: 16px;
+        font-size: 14px;
+        font-weight: 500;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        transition: all 0.2s;
+        cursor: pointer;
+        letter-spacing: -0.2px;
+    }
+
+    .related-btn:hover {
+        background: rgba(255,255,255,0.08);
+        border-color: rgba(255,255,255,0.15);
+        color: #fff;
+        transform: translateY(-2px);
+    }
+
+    .arr {
+        font-size: 12px;
+        transition: transform 0.2s;
+    }
+
+    .related-btn:hover .arr {
+        transform: translateX(4px);
+    }
+
+    .footer {
+        text-align: center;
+        font-size: 12px;
+        color: rgba(255,255,255,0.2);
+        margin-top: 64px;
+        padding-top: 32px;
+        border-top: 1px solid rgba(255,255,255,0.05);
+    }
+
+    @media (max-width: 640px) {
+        .goals-card, .insights-card {
+            padding: 24px 20px;
+        }
+        
+        .related-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .timeline-point {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 12px;
+        }
+        
+        .insight-content {
+            padding-left: 0;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+
+    <a href="/ai/engine/" class="back-link">← AI Engine</a>
+
+    <h1 class="page-title">Smartest Suggestions</h1>
+    <p class="page-sub">Personalized recommendations to optimize your finances</p>
+
+    <!-- Goals Card -->
+    <div class="goals-card">
+        <p class="section-label">Goal-Based Recommendations</p>
+        {% if suggestions %}
+            <div style="color: rgba(255,255,255,0.8); line-height: 1.8; font-size: 14px;">
+                {% for suggestion in suggestions %}
+                    {% if suggestion %}
+                        <div style="margin-bottom: 12px; padding-left: 16px; border-left: 2px solid rgba(74, 222, 128, 0.3);">
+                            {{ suggestion|linebreaks }}
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="no-goals-state">
+                <div class="no-goals-icon">📝</div>
+                <span class="no-goals-text">No active goals found. Create goals to get personalized planning advice.</span>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- AI Explanation Card -->
+    {% if ai_explanation %}
+    <div class="insights-card">
+        <p class="section-label">AI-Powered Insights</p>
+        <div style="color: rgba(255,255,255,0.75); line-height: 1.7; font-size: 14px; white-space: pre-wrap;">{{ ai_explanation }}</div>
+    </div>
+    {% endif %}
+
+    <div style="margin-top: 48px;">
+        <p class="section-label">Related Tools</p>
+        <div class="related-grid">
+            <button class="related-btn" onclick="window.location.href='/ai/strategy/'">Monthly Strategy <span class="arr">↗</span></button>
+            <button class="related-btn" onclick="window.location.href='/ai/insights/'">Behavioral Insights <span class="arr">↗</span></button>
+            <button class="related-btn" onclick="window.location.href='/ai/overspending/'">Overspending Check <span class="arr">↗</span></button>
+        </div>
+    </div>
+
+    <div class="footer">© 2026 ISECO Finance Dashboard</div>
+
+{% endblock %}

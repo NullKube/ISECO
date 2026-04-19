@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block title %}Goal Details - ISECO{% endblock %}
+{% block page_heading %}Goal Details{% endblock %}
+{% block page_subtitle %}See progress, feasibility, and the exact next steps for this target.{% endblock %}
+
+{% block content %}
+<section class="card">
+    <div class="list-item-title">
+        <div>
+            <h3>{{ goal.name }}</h3>
+            <div class="list-item-meta">Owned by {{ goal.user.username }}</div>
+        </div>
+        <span class="pill {% if goal.status == 'active' %}green{% elif goal.status == 'completed' %}purple{% elif goal.status == 'missed' %}red{% else %}blue{% endif %}">{{ goal.status|title }}</span>
+    </div>
+    <div class="stats-grid" style="margin-top: 20px; grid-template-columns: repeat(2, minmax(0, 1fr));">
+        <div class="stat-card">
+            <div class="stat-label">Target</div>
+            <p class="stat-value purple">₹{{ goal.target_amount|floatformat:0 }}</p>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Saved</div>
+            <p class="stat-value blue">₹{{ goal.amount_saved|floatformat:0 }}</p>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Remaining</div>
+            <p class="stat-value red">₹{{ goal.target_amount|default:0|floatformat:0 }}</p>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Deadline</div>
+            <p class="stat-value green">{{ goal.deadline }}</p>
+        </div>
+    </div>
+    <div class="button-row" style="margin-top: 22px; gap: 10px; flex-wrap: wrap;">
+        <a href="/goals/list/" class="action-btn action-outline">Goal list</a>
+        <a href="/goals/suggestions/" class="action-btn action-outline">AI suggestions</a>
+        {% if goal.status == 'active' %}
+        <a href="/goals/{{ goal.id }}/edit/" class="action-btn action-blue">Edit goal</a>
+        {% endif %}
+        {% if goal.amount_saved >= goal.target_amount and goal.status == 'active' %}
+        <form action="/goals/{{ goal.id }}/complete/" method="POST" style="margin:0;">
+            {% csrf_token %}
+            <button class="action-btn action-teal" type="submit">Mark achieved</button>
+        </form>
+        {% endif %}
+        <a href="/goals/list/" class="action-btn action-outline">Back to goals</a>
+    </div>
+</section>
+
+{% if feasibility %}
+<section class="card section-card">
+    <h3>Feasibility analysis</h3>
+    <div class="list-item-meta" style="margin-top: 10px;">
+        <strong>Status:</strong> {% if feasibility.possible %}✅ Feasible{% else %}❌ Not feasible{% endif %}
+    </div>
+    <div class="stats-grid" style="margin-top: 18px; grid-template-columns: repeat(2, minmax(0, 1fr));">
+        <div class="stat-card">
+            <div class="stat-label">Required / month</div>
+            <p class="stat-value red">₹{{ feasibility.required_per_month|floatformat:2 }}</p>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Your savings</div>
+            <p class="stat-value blue">₹{{ feasibility.monthly_savings|floatformat:2 }}</p>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Months left</div>
+            <p class="stat-value green">{{ feasibility.months_left }}</p>
+        </div>
+        <div class="stat-card">
+            <div class="stat-label">Reason</div>
+            <p class="stat-value" style="font-size:1rem; color: var(--text-muted);">{{ feasibility.reason }}</p>
+        </div>
+    </div>
+</section>
+{% endif %}
+{% endblock %}

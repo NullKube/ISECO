@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}ISECO Auth{% endblock %}</title>
+    <style>
+        :root {
+            --bg: #08090d;
+            --surface: #0f1623;
+            --accent: #3b5bdb;
+            --text: #e8e9ef;
+            --muted: rgba(255,255,255,0.6);
+            --border: rgba(255,255,255,0.1);
+        }
+        * { box-sizing: border-box; }
+        html, body { min-height: 100%; }
+        body {
+            margin: 0;
+            font-family: 'DM Sans', sans-serif;
+            background: radial-gradient(circle at top, rgba(59,91,219,0.15), transparent 35%),
+                        linear-gradient(180deg, #08090d 0%, #04050a 100%);
+            color: var(--text);
+            display: grid;
+            place-items: center;
+            padding: 24px;
+        }
+        .auth-card {
+            width: min(100%, 420px);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 28px;
+            padding: 36px 30px;
+            box-shadow: 0 32px 90px rgba(0,0,0,0.42);
+        }
+        .auth-brand {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.65rem;
+            font-weight: 800;
+            margin-bottom: 10px;
+        }
+        .auth-copy {
+            color: var(--muted);
+            margin-bottom: 26px;
+        }
+        .form-group {
+            display: grid;
+            gap: 10px;
+            margin-bottom: 18px;
+        }
+        .form-label {
+            color: var(--muted);
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            background: rgba(255,255,255,0.05);
+            color: var(--text);
+        }
+        .form-input:focus {
+            outline: none;
+            border-color: rgba(59,91,219,0.45);
+            box-shadow: 0 0 0 4px rgba(59,91,219,0.14);
+        }
+        .submit-btn {
+            width: 100%;
+            border: none;
+            background: var(--accent);
+            color: #fff;
+            border-radius: 16px;
+            padding: 14px 0;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.18s ease, filter 0.18s ease;
+        }
+        .submit-btn:hover { transform: translateY(-1px); filter: brightness(1.04); }
+        .secondary-link {
+            display: block;
+            margin-top: 18px;
+            color: var(--muted);
+            text-align: center;
+        }
+        .secondary-link:hover { color: #fff; }
+        .error-banner {
+            background: rgba(240,62,62,0.12);
+            color: #f8d7da;
+            border: 1px solid rgba(240,62,62,0.2);
+            border-radius: 14px;
+            padding: 14px 16px;
+            margin-bottom: 18px;
+        }
+    </style>
+</head>
+<body>
+    <div class="auth-card">
+        <div class="auth-brand">ISECO</div>
+        <p class="auth-copy">Secure login and account access with modern SaaS layout.</p>
+        {% block content %}{% endblock %}
+    </div>
+</body>
+</html>

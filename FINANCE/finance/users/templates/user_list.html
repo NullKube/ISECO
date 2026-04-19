@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block title %}Users — ISECO{% endblock %}
+{% block page_heading %}User Directory{% endblock %}
+{% block page_subtitle %}View registered users and access their profiles.{% endblock %}
+
+{% block content %}
+<div class="card">
+    <div class="list-card">
+        {% for user in users %}
+        <article class="list-item">
+            <div class="list-item-title">
+                <div>
+                    <h3>{{ user.username }}</h3>
+                    <div class="list-item-meta">Joined {{ user.created_at }}</div>
+                </div>
+                <a class="action-btn action-outline" href="/users/{{ user.id }}/">View</a>
+            </div>
+        </article>
+        {% empty %}
+        <div class="empty-state">No users found yet.</div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

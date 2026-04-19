@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}Multi-Goal Feasibility — ISECO{% endblock %}
+{% block page_heading %}Multi-Goal Feasibility{% endblock %}
+{% block page_subtitle %}Review feasibility for your active goals in one dashboard view.{% endblock %}
+
+{% block content %}
+<div class="grid grid-3" style="gap:1.5rem; margin-bottom:1.5rem;">
+    <div class="card stat-card">
+        <h3>Monthly Savings</h3>
+        <div class="stat-value">₹{{ monthly_savings|default:'0' }}</div>
+    </div>
+    <div class="card stat-card">
+        <h3>Required / Month</h3>
+        <div class="stat-value">₹{{ total_weighted_requirement|default:'0' }}</div>
+    </div>
+    <div class="card stat-card">
+        <h3>Surplus / Shortfall</h3>
+        <div class="stat-value" style="color: {% if surplus > 0 %}var(--success){% else %}var(--danger){% endif %};">{% if surplus > 0 %}+₹{{ surplus|floatformat:0 }}{% else %}-₹{{ surplus_abs|floatformat:0 }}{% endif %}</div>
+    </div>
+</div>
+<div class="card" style="margin-bottom: 1.5rem;">
+    <h2>Active Goals</h2>
+    <div class="list-card">
+        {% for item in goals_with_feasibility %}
+        <article class="list-item">
+            <div class="list-item-title">
+                <div>
+                    <h3>{{ item.goal.name }}</h3>
+                    <div class="list-item-meta">Deadline: {{ item.goal.deadline|date:'M d, Y' }}</div>
+                </div>
+                <span class="pill {% if item.feasibility.possible %}green{% else %}red{% endif %}">{% if item.feasibility.possible %}Feasible{% else %}Not Feasible{% endif %}</span>
+            </div>
+            <div class="list-item-meta">Saved: ₹{{ item.goal.amount_saved|floatformat:0 }} · Target: ₹{{ item.goal.target_amount|floatformat:0 }}</div>
+            <div class="list-item-meta">Required per month: ₹{{ item.feasibility.required_per_month|floatformat:0 }}</div>
+        </article>
+        {% empty %}
+        <div class="empty-state">No active goals available.</div>
+        {% endfor %}
+    </div>
+</div>
+{% if completed_goals %}
+<div class="card">
+    <h2>Completed Goals</h2>
+    <div class="list-card">
+        {% for goal in completed_goals %}
+        <article class="list-item">
+            <div class="list-item-title">
+                <div>
+                    <h3>{{ goal.name }}</h3>
+                    <div class="list-item-meta">Completed on {{ goal.completed_date|date:'M d, Y' }}</div>
+                </div>
+                <span class="pill green">Completed</span>
+            </div>
+        </article>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}
+<div class="card" style="text-align:center;">
+    <a class="action-btn action-outline" href="/goals/suggestions/">Go to AI Suggestions</a>
+    <a class="action-btn action-outline" href="/ai/forecast/">View Forecast</a>
+</div>
+{% endblock %}

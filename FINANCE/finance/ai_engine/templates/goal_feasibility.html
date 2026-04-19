@@ -1,0 +1,62 @@
+{% extends "base.html" %}
+
+{% block title %}Goal Feasibility — ISECO{% endblock %}
+{% block page_heading %}Goal Feasibility Dashboard{% endblock %}
+{% block page_subtitle %}Check whether your savings and timelines match your goals.{% endblock %}
+
+{% block content %}
+<div class="grid grid-3" style="gap:1.5rem; margin-bottom:1.5rem;">
+    <div class="card stat-card">
+        <h3>Plan Status</h3>
+        <div class="stat-value">{% if multi_goal.feasible %}Feasible{% else %}Not Feasible{% endif %}</div>
+    </div>
+    <div class="card stat-card">
+        <h3>Surplus / Shortfall</h3>
+        <div class="stat-value" style="color: {% if multi_goal.surplus > 0 %}var(--success){% else %}var(--danger){% endif %};">{% if multi_goal.surplus > 0 %}+₹{{ multi_goal.surplus|floatformat:0 }}{% else %}-₹{{ multi_goal.surplus_abs|floatformat:0 }}{% endif %}</div>
+    </div>
+    <div class="card stat-card">
+        <h3>Active Goals</h3>
+        <div class="stat-value">{{ multi_goal.goal_breakdown|length }}</div>
+    </div>
+</div>
+<div class="card">
+    <h2>Goal Breakdown</h2>
+    <div class="list-card">
+        {% for g in multi_goal.goal_breakdown %}
+        <article class="list-item">
+            <div class="list-item-title">
+                <div>
+                    <h3>{{ g.goal_name }}</h3>
+                    <div class="list-item-meta">Priority {{ g.priority }}</div>
+                </div>
+                <span class="pill {% if g.priority|lower == 'high' %}red{% else %}green{% endif %}">₹{{ g.monthly_needed }}</span>
+            </div>
+            <div class="list-item-meta">Weight: {{ g.priority_weight }}</div>
+        </article>
+        {% endfor %}
+    </div>
+</div>
+<div id="perGoalDetail" class="card" style="display:none;"></div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function showGoalFeasibility(goalId) {
+    fetch('/ai/feasibility/' + goalId + '/')
+        .then(r => r.json())
+        .then(data => {
+            const detail = document.getElementById('perGoalDetail');
+            let html = '<div class="card"><h3>Feasibility for Goal ID ' + goalId + '</h3>';
+            html += '<div class="list-card">';
+            html += '<article class="list-item"><div class="list-item-meta"><strong>Status:</strong> ' + (data.possible ? 'Feasible' : 'Not Feasible') + '</div></article>';
+            html += '<article class="list-item"><div class="list-item-meta"><strong>Months left:</strong> ' + data.months_left + '</div></article>';
+            html += '<article class="list-item"><div class="list-item-meta"><strong>Required per month:</strong> ₹' + data.required_per_month + '</div></article>';
+            html += '<article class="list-item"><div class="list-item-meta"><strong>Total required:</strong> ₹' + data.total_required + '</div></article>';
+            html += '<article class="list-item"><div class="list-item-meta"><strong>Reason:</strong> ' + data.reason + '</div></article>';
+            html += '</div></div>';
+            detail.innerHTML = html;
+            detail.style.display = 'block';
+        });
+}
+</script>
+{% endblock %}

@@ -1,0 +1,174 @@
+{% extends "base.html" %}
+
+{% block title %}AI Engine Dashboard - ISECO{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1>AI Engine Dashboard</h1>
+    <p>Complete AI-powered financial analysis and recommendations</p>
+</div>
+
+{% if status == "error" %}
+<div class="alert alert-critical">
+    <strong>Error:</strong> {{ message|default:"Failed to load AI data" }}
+</div>
+{% endif %}
+
+<!-- FORECAST CARD -->
+<div class="card">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+        <h2>Savings Forecast</h2>
+        <a href="/ai/forecast/" class="btn btn-outline">View Full Forecast Analysis &rarr;</a>
+    </div>
+    <div class="grid grid-3">
+        {% if forecast.forecast %}
+        {% for item in forecast.forecast|slice:":3" %}
+        <div style="text-align: center; padding: 1rem; background: var(--bg); border-radius: 8px;">
+            <div style="font-size: 0.875rem; color: var(--text-muted);">{{ item.month_name }}</div>
+            <div style="font-size: 1.25rem; font-weight: 700; color: var(--primary);">₹{{ item.predicted_monthly_savings|floatformat:0 }}</div>
+            <div style="font-size: 1.5rem;">{{ item.trend_emoji }}</div>
+        </div>
+        {% endfor %}
+        {% else %}
+        <p>No forecast data available.</p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- MULTI-GOAL FEASIBILITY -->
+<div class="card">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+        <h2>Goal Feasibility</h2>
+        <a href="/ai/feasibility/multi/" class="btn btn-outline">Goal Feasibility &rarr;</a>
+    </div>
+    {% if multi_goal_feasibility.feasible %}
+    <div class="alert alert-success">
+        <strong>{{ multi_goal_feasibility.reason }}</strong>
+    </div>
+    {% else %}
+    <div class="alert alert-warning">
+        <strong>{{ multi_goal_feasibility.reason }}</strong>
+    </div>
+    {% endif %}
+
+    {% if goal_breakdown %}
+    <div style="margin-top: 1rem;">
+        <strong>Top Priority Goals:</strong>
+        <ul class="styled" style="margin-top: 0.5rem;">
+            {% for goal in goal_breakdown|slice:":3" %}
+            <li>
+                <strong>{{ goal.goal_name }}</strong> (Priority {{ goal.priority }})
+                - ₹{{ goal.monthly_needed|floatformat:0 }}/month required
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+    {% endif %}
+</div>
+
+<!-- OVERSPENDING ALERTS -->
+<div class="card">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+        <h2>Overspending Alerts</h2>
+        <a href="/ai/overspending/" class="btn btn-outline">Full Report &rarr;</a>
+    </div>
+    {% if overspending_alerts.alerts %}
+    {% for alert in overspending_alerts.alerts|slice:":3" %}
+    <div class="alert alert-{% if alert.type == 'critical' %}critical{% elif alert.type == 'warning' %}warning{% elif alert.type == 'success' %}success{% else %}info{% endif %}" style="margin-bottom: 0.5rem;">
+        <strong>{{ alert.category }}</strong>: {{ alert.message }}
+    </div>
+    {% endfor %}
+    {% else %}
+    <div class="alert alert-success">
+        No overspending detected! Great job staying on budget.
+    </div>
+    {% endif %}
+</div>
+
+<!-- SUGGESTIONS -->
+<div class="card">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+        <h2>Smart Suggestions</h2>
+        <a href="/ai/suggestions/" class="btn btn-outline">View More &rarr;</a>
+    </div>
+    {% if suggestions.suggestions %}
+    <ul class="styled">
+        {% for suggestion in suggestions.suggestions|slice:":5" %}
+        <li>{{ suggestion }}</li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <p>No suggestions available. Add expenses and goals to get personalized advice.</p>
+    {% endif %}
+</div>
+
+<!-- INSIGHTS -->
+<div class="card">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+        <h2>Behavioral Insights</h2>
+        <a href="/ai/insights/" class="btn btn-outline">Full Insights &rarr;</a>
+    </div>
+    {% if insights %}
+    <ul class="styled">
+        {% for insight in insights|slice:":3" %}
+        <li>{{ insight }}</li>
+        {% endfor %}
+    </ul>
+    {% else %}
+    <p>No insights available yet.</p>
+    {% endif %}
+</div>
+
+<!-- STRATEGY -->
+<div class="card">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+        <h2>Monthly Strategy</h2>
+        <a href="/ai/strategy/" class="btn btn-outline">Full Planner &rarr;</a>
+    </div>
+    {% if strategy.ai_explanation %}
+    <div class="ai-box">
+        {{ strategy.ai_explanation|truncatewords:50 }}
+    </div>
+    {% else %}
+    <p>No strategy available. Create goals to get your action plan.</p>
+    {% endif %}
+</div>
+
+<!-- CLUSTERING -->
+<div class="card">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+        <h2>Spending Clusters</h2>
+        <a href="/ai/clustering/" class="btn btn-outline">Explore &rarr;</a>
+    </div>
+    {% if clusters.clusters %}
+    <div class="grid grid-3">
+        {% for cluster_name, cluster_data in clusters.clusters.items %}
+        <div style="padding: 1rem; background: var(--bg); border-radius: 8px;">
+            <strong>{{ cluster_name }}</strong>
+            <div style="font-size: 0.875rem; color: var(--text-muted); margin-top: 0.5rem;">
+                {{ cluster_data.count }} transactions | ₹{{ cluster_data.total_amount|floatformat:0 }} total
+            </div>
+            <small>{{ cluster_data.insight }}</small>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p>No clustering data available. Add more expenses to see patterns.</p>
+    {% endif %}
+</div>
+
+<!-- QUICK ACTIONS -->
+<div class="card" style="text-align: center;">
+    <h2>Quick Actions</h2>
+    <div style="display: flex; flex-wrap: wrap; gap: 0.75rem; justify-content: center; margin-top: 1rem;">
+        <a href="/ai/forecast/" class="btn btn-outline">Forecast</a>
+        <a href="/ai/feasibility/multi/" class="btn btn-outline">Goal Feasibility</a>
+        <a href="/ai/overspending/" class="btn btn-outline">Overspending</a>
+        <a href="/ai/suggestions/" class="btn btn-outline">Suggestions</a>
+        <a href="/ai/insights/" class="btn btn-outline">Insights</a>
+        <a href="/ai/strategy/" class="btn btn-outline">Strategy</a>
+        <a href="/ai/clustering/" class="btn btn-outline">Clustering</a>
+        <a href="/ai/monthly/" class="btn btn-outline">Monthly Analysis</a>
+    </div>
+</div>
+{% endblock %}

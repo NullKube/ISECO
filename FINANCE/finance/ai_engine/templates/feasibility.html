@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block title %}Goal Feasibility — ISECO{% endblock %}
+{% block page_heading %}Goal Feasibility Result{% endblock %}
+{% block page_subtitle %}A quick result for the selected financial goal.{% endblock %}
+
+{% block content %}
+<div class="card" style="text-align:center;">
+    {% if possible %}
+        <span class="pill green" style="margin-bottom: 16px; display:inline-block;">This goal IS achievable</span>
+        <p>Months left: {{ months_left }}</p>
+    {% else %}
+        <span class="pill red" style="margin-bottom: 16px; display:inline-block;">This goal is NOT achievable</span>
+        <p>Reason: {{ reason }}</p>
+    {% endif %}
+</div>
+{% endblock %}

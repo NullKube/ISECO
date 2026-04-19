@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block title %}Savings Forecast — ISECO{% endblock %}
+{% block page_heading %}Savings Forecast{% endblock %}
+{% block page_subtitle %}Projected savings, historical performance, and AI insights in one unified dashboard view.{% endblock %}
+
+{% block content %}
+<div class="card" style="margin-bottom: 1.5rem;">
+    <h2>Forecast Summary</h2>
+    <p class="list-item-meta">Model: {{ method }}</p>
+    <p class="list-item-meta">Accuracy: {{ model_accuracy }} — {{ accuracy_interpretation }}</p>
+</div>
+
+{% if current_month %}
+<div class="grid grid-3" style="gap:1.5rem; margin-bottom:1.5rem;">
+    <div class="card stat-card">
+        <h3>Saved So Far</h3>
+        <div class="stat-value">₹{{ current_month.savings_mtd|default:'0' }}</div>
+    </div>
+    <div class="card stat-card">
+        <h3>Income</h3>
+        <div class="stat-value">₹{{ current_month.income_mtd|default:'0' }}</div>
+    </div>
+    <div class="card stat-card">
+        <h3>Expenses</h3>
+        <div class="stat-value">₹{{ current_month.expense_mtd|default:'0' }}</div>
+    </div>
+</div>
+{% endif %}
+
+<div class="card" style="margin-bottom: 1.5rem;">
+    <h2>Forecast Timeline</h2>
+    <div class="list-card">
+        {% for item in forecast %}
+        <article class="list-item">
+            <div class="list-item-title">
+                <div>
+                    <h3>{{ item.month_name }}</h3>
+                    <div class="list-item-meta">Predicted savings</div>
+                </div>
+                <span class="pill {% if item.predicted_monthly_savings > 0 %}green{% else %}red{% endif %}">₹{{ item.predicted_monthly_savings|floatformat:0 }}</span>
+            </div>
+            <div class="list-item-meta">Cumulative: ₹{{ item.expected_cumulative_savings|floatformat:0 }}</div>
+        </article>
+        {% empty %}
+        <div class="empty-state">No forecast timeline data available.</div>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="card" style="margin-bottom: 1.5rem;">
+    <h2>Historical Breakdown</h2>
+    <div class="list-card">
+        {% for h in historical_breakdown %}
+        <article class="list-item">
+            <div class="list-item-title">
+                <div>
+                    <h3>{{ h.month }}</h3>
+                    <div class="list-item-meta">Income / Expense</div>
+                </div>
+                <span class="pill {% if h.savings > 0 %}green{% else %}red{% endif %}">{{ h.emoji }} ₹{{ h.savings|floatformat:0 }}</span>
+            </div>
+            <div class="list-item-meta">Income: ₹{{ h.income }} · Expenses: ₹{{ h.expense }}</div>
+            <div class="list-item-meta">Status: {{ h.status }}</div>
+        </article>
+        {% empty %}
+        <div class="empty-state">No historical performance data available.</div>
+        {% endfor %}
+    </div>
+</div>
+
+{% if ai_explanation %}
+<div class="card">
+    <h2>AI Analysis</h2>
+    <p>{{ ai_explanation }}</p>
+</div>
+{% endif %}
+{% endblock %}

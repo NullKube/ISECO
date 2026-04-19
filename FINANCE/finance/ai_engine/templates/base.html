@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>{% block title %}ISECO{% endblock %}</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Syne:wght@500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: #0a0b0f;
+            min-height: 100vh;
+            color: #e8e9ef;
+        }
+
+        /* ── NAV ── */
+        .nav {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 48px;
+            border-bottom: 1px solid rgba(255,255,255,0.06);
+            background: rgba(10,11,15,0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .logo {
+            font-family: 'Syne', sans-serif;
+            font-weight: 700;
+            font-size: 20px;
+            letter-spacing: -0.5px;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+        }
+
+        .logo-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #4ade80;
+            box-shadow: 0 0 8px #4ade80;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 32px;
+            list-style: none;
+        }
+
+        .nav-links a {
+            font-size: 13px;
+            font-weight: 500;
+            color: rgba(255,255,255,0.45);
+            text-decoration: none;
+            letter-spacing: 0.02em;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover { color: rgba(255,255,255,0.9); }
+        .nav-links a.active { color: #fff; }
+
+        /* ── LAYOUT ── */
+        .content {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 48px 24px 80px;
+        }
+
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            font-weight: 500;
+            color: rgba(255,255,255,0.35);
+            text-decoration: none;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            margin-bottom: 36px;
+            transition: color 0.2s;
+        }
+
+        .back-link:hover { color: rgba(255,255,255,0.7); }
+
+        .page-title {
+            font-family: 'Syne', sans-serif;
+            font-size: 36px;
+            font-weight: 700;
+            letter-spacing: -1px;
+            color: #fff;
+            margin-bottom: 8px;
+        }
+
+        .page-sub {
+            font-size: 14px;
+            color: rgba(255,255,255,0.38);
+            font-weight: 400;
+            margin-bottom: 40px;
+        }
+
+        /* ── SUGGESTIONS LIST ── */
+        .suggestions-card {
+            background: rgba(255,255,255,0.025);
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 16px;
+            overflow: hidden;
+            margin-bottom: 24px;
+        }
+
+        .suggestion-item {
+            padding: 20px 28px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            transition: background 0.15s;
+        }
+
+        .suggestion-item:last-child { border-bottom: none; }
+
+        .suggestion-item:hover { background: rgba(255,255,255,0.02); }
+
+        .item-index {
+            font-family: 'Syne', sans-serif;
+            font-size: 11px;
+            font-weight: 600;
+            color: rgba(255,255,255,0.2);
+            letter-spacing: 0.06em;
+            min-width: 28px;
+            padding-top: 2px;
+        }
+
+        .item-text {
+            font-size: 14px;
+            line-height: 1.7;
+            color: rgba(255,255,255,0.72);
+            flex: 1;
+        }
+
+        /* ── RELATED TOOLS ── */
+        .related-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 40px;
+        }
+
+        .related-btn {
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 10px;
+            padding: 14px 16px;
+            background: rgba(255,255,255,0.03);
+            color: rgba(255,255,255,0.6);
+            font-family: 'DM Sans', sans-serif;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .related-btn:hover {
+            border-color: rgba(255,255,255,0.2);
+            color: rgba(255,255,255,0.9);
+            background: rgba(255,255,255,0.05);
+        }
+
+        .arr { opacity: 0.3; font-size: 12px; }
+
+        /* ── FOOTER ── */
+        .footer {
+            text-align: center;
+            margin-top: 64px;
+            font-size: 12px;
+            color: rgba(255,255,255,0.15);
+            letter-spacing: 0.04em;
+        }
+
+        /* ── EMPTY STATE ── */
+        .empty-state {
+            padding: 32px 28px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 13px;
+            color: rgba(255,255,255,0.3);
+        }
+
+        .empty-icon {
+            width: 28px;
+            height: 28px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        /* ── RESPONSIVE ── */
+        @media (max-width: 640px) {
+            .nav { padding: 16px 20px; }
+            .nav-links { gap: 18px; }
+            .content { padding: 32px 16px 60px; }
+            .page-title { font-size: 28px; }
+            .related-grid { grid-template-columns: 1fr; }
+        }
+
+        {% block extra_head %}{% endblock %}
+    </style>
+</head>
+<body>
+
+<nav class="nav">
+    <a href="/users/dashboard/" class="logo">
+        <div class="logo-dot"></div>
+        ISECO
+    </a>
+    <ul class="nav-links">
+        <li><a href="/users/dashboard/">Dashboard</a></li>
+        <li><a href="/ai/engine/" class="active">AI Engine</a></li>
+        <li><a href="/goals/">Goals</a></li>
+        <li><a href="/expenses/">Expenses</a></li>
+    </ul>
+</nav>
+
+<div class="content">
+    {% block content %}{% endblock %}
+</div>
+
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

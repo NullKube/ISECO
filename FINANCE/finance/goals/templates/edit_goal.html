@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Goal - ISECO{% endblock %}
+{% block page_heading %}Edit Goal{% endblock %}
+{% block page_subtitle %}Adjust your goal details and keep progress aligned with the updated plan.{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <p class="eyebrow">Goals</p>
+        <h2>Edit savings target</h2>
+        <p class="page-copy">Update your goal details and keep progress aligned with reality.</p>
+    </div>
+    <a href="/goals/{{ goal.id }}/view/" class="action-btn action-outline">Back to goal</a>
+</div>
+
+<section class="card form-card">
+    <div class="form-group">
+        <div class="list-item-title">
+            <div>
+                <h3>{{ goal.name }}</h3>
+                <div class="list-item-meta">Current status: {{ goal.status|title }}</div>
+            </div>
+            <span class="pill {% if goal.status == 'active' %}green{% elif goal.status == 'completed' %}purple{% else %}blue{% endif %}">{{ goal.status|title }}</span>
+        </div>
+        <p class="list-item-meta">Progress: ₹{{ goal.amount_saved|floatformat:0 }} / ₹{{ goal.target_amount|floatformat:0 }}</p>
+    </div>
+    <div class="button-row" style="margin-bottom: 20px; gap: 10px; flex-wrap: wrap;">
+        <a href="/goals/{{ goal.id }}/view/" class="action-btn action-outline">Back to goal</a>
+        <a href="/goals/list/" class="action-btn action-outline">Goal list</a>
+        <a href="/goals/suggestions/" class="action-btn action-outline">AI suggestions</a>
+    </div>
+    <form method="POST" class="form-grid">
+        {% csrf_token %}
+        <div class="form-group">
+            <label class="form-label">Target amount</label>
+            <input class="form-input" type="number" name="target_amount" step="0.01" value="{{ goal.target_amount }}" required>
+            <div class="hint-text">Current saved amount: ₹{{ goal.amount_saved|floatformat:0 }}</div>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Priority</label>
+            <input class="form-input" type="number" name="priority" min="1" max="10" value="{{ goal.priority }}" required>
+        </div>
+        <div class="form-group">
+            <label class="form-label">Deadline</label>
+            <input class="form-input" type="date" name="deadline" value="{{ goal.deadline|date:'Y-m-d' }}" required>
+            <div class="hint-text">Extending the deadline may make your goal more feasible.</div>
+        </div>
+        <div class="button-row">
+            <button class="action-btn action-teal" type="submit">Update goal</button>
+            <a href="/goals/{{ goal.id }}/view/" class="action-btn action-outline">Cancel</a>
+        </div>
+    </form>
+</section>
+{% endblock %}

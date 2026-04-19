@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>{{ page_title }}</h2>
+
+    <div class="row mt-4">
+        <div class="col-md-4">
+            <div class="card text-center">
+                <div class="card-header">Monthly Income</div>
+                <div class="card-body">
+                    <h3 class="card-title">${{ monthly_income|floatformat:2 }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-center">
+                <div class="card-header">Monthly Expenses</div>
+                <div class="card-body">
+                    <h3 class="card-title">${{ monthly_expense|floatformat:2 }}</h3>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card text-center">
+                <div class="card-header">Monthly Savings</div>
+                <div class="card-body">
+                    <h3 class="card-title text-success">${{ monthly_savings|floatformat:2 }}</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <p class="text-muted mt-3">Analysis based on {{ months_analyzed }} months of data</p>
+
+    {% if forecast %}
+        <h4 class="mt-4">Savings Forecast</h4>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Month</th>
+                    <th>Projected Savings</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in forecast %}
+                    <tr>
+                        <td>{{ item.month|default:forloop.counter }}</td>
+                        <td>${{ item.projected_savings|default:0|floatformat:2 }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+</div>
+{% endblock %}

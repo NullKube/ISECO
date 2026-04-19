@@ -1,0 +1,716 @@
+{% extends "base.html" %}
+{% block title %}Goals - ISECO{% endblock %}
+
+{% block extra_head %}
+<style>
+    /* ===== DASHBOARD LAYOUT ===== */
+    .goals-dashboard {
+        display: grid;
+        grid-template-columns: 60% 40%;
+        gap: 24px;
+        margin-bottom: 40px;
+    }
+
+    @media (max-width: 1024px) {
+        .goals-dashboard {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .goals-column {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+
+    .column-title {
+        font-size: 18px;
+        font-weight: 700;
+        color: #fff;
+        margin-bottom: 12px;
+    }
+
+    /* ===== GOAL CARDS ===== */
+    .goal-card {
+        background: rgba(255,255,255,0.02);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 18px;
+        padding: 20px;
+        transition: all 0.2s ease;
+    }
+
+    .goal-card:hover {
+        border-color: rgba(255,255,255,0.15);
+        background: rgba(255,255,255,0.04);
+    }
+
+    .goal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: start;
+        margin-bottom: 12px;
+        gap: 12px;
+    }
+
+    .goal-header h4 {
+        font-size: 16px;
+        font-weight: 600;
+        color: #fff;
+        margin: 0;
+    }
+
+    .priority-badge {
+        background: rgba(255,255,255,0.1);
+        padding: 4px 10px;
+        border-radius: 6px;
+        font-size: 12px;
+        color: rgba(255,255,255,0.7);
+        white-space: nowrap;
+    }
+
+    .deadline {
+        font-size: 13px;
+        color: rgba(255,255,255,0.5);
+        margin: 8px 0;
+    }
+
+    /* ===== PROGRESS BAR ===== */
+    .progress-bar {
+        width: 100%;
+        height: 6px;
+        background: rgba(255,255,255,0.1);
+        border-radius: 3px;
+        overflow: hidden;
+        margin: 12px 0;
+    }
+
+    .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #34d399, #22c55e);
+        transition: width 0.3s ease;
+    }
+
+    .progress-text {
+        font-size: 12px;
+        color: rgba(255,255,255,0.6);
+        margin-bottom: 12px;
+    }
+
+    /* ===== ANALYSIS BOX ===== */
+    .analysis-box {
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 12px;
+        padding: 12px;
+        margin: 12px 0;
+        font-size: 13px;
+    }
+
+    .analysis-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 6px 0;
+        color: rgba(255,255,255,0.7);
+    }
+
+    .analysis-label {
+        font-weight: 500;
+        color: rgba(255,255,255,0.6);
+    }
+
+    .analysis-value {
+        color: #fff;
+        font-weight: 600;
+    }
+
+    /* ===== STATUS BADGE ===== */
+    .status-badge {
+        display: inline-block;
+        padding: 6px 12px;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 600;
+        margin: 8px 0;
+    }
+
+    .status-badge.feasible {
+        background: rgba(52, 211, 153, 0.2);
+        color: #34d399;
+        border: 1px solid rgba(52, 211, 153, 0.3);
+    }
+
+    .status-badge.not-feasible {
+        background: rgba(248, 113, 113, 0.2);
+        color: #f87171;
+        border: 1px solid rgba(248, 113, 113, 0.3);
+    }
+
+    /* ===== AI SUGGESTION ===== */
+    .ai-suggestion {
+        background: rgba(59, 130, 246, 0.1);
+        border: 1px solid rgba(59, 130, 246, 0.3);
+        border-radius: 10px;
+        padding: 16px;
+        margin: 12px 0;
+    }
+
+    .ai-suggestion p {
+        margin: 6px 0;
+        font-size: 13px;
+        color: rgba(255,255,255,0.8);
+    }
+
+    .ai-suggestion strong {
+        color: #60a5fa;
+        font-weight: 700;
+    }
+
+    .suggestion-title {
+        color: #60a5fa;
+        font-weight: 700;
+        margin-bottom: 8px;
+        font-size: 14px;
+    }
+
+    .suggestion-detail {
+        background: rgba(59, 130, 246, 0.05);
+        border-left: 2px solid #60a5fa;
+        padding: 10px 12px;
+        margin: 10px 0;
+        border-radius: 4px;
+        font-size: 13px;
+    }
+
+    .suggestion-buttons {
+        display: flex;
+        gap: 8px;
+        margin-top: 12px;
+    }
+
+    .btn-small {
+        padding: 6px 12px;
+        border: none;
+        border-radius: 6px;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+    }
+
+    .btn-accept {
+        background: rgba(52, 211, 153, 0.3);
+        color: #34d399;
+        border: 1px solid rgba(52, 211, 153, 0.5);
+    }
+
+    .btn-accept:hover {
+        background: rgba(52, 211, 153, 0.4);
+    }
+
+    .btn-reject {
+        background: rgba(248, 113, 113, 0.2);
+        color: #f87171;
+        border: 1px solid rgba(248, 113, 113, 0.4);
+    }
+
+    .btn-reject:hover {
+        background: rgba(248, 113, 113, 0.3);
+    }
+
+    /* ===== GOAL ACTIONS ===== */
+    .goal-actions {
+        display: flex;
+        gap: 8px;
+        margin-top: 12px;
+    }
+
+    .goal-actions a,
+    .goal-actions button {
+        flex: 1;
+        padding: 8px 12px;
+        border: none;
+        border-radius: 8px;
+        font-size: 12px;
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: none;
+        text-align: center;
+        transition: all 0.2s;
+    }
+
+    .btn-edit {
+        background: rgba(99, 102, 241, 0.2);
+        color: #a5b4fc;
+        border: 1px solid rgba(99, 102, 241, 0.3);
+    }
+
+    .btn-edit:hover {
+        background: rgba(99, 102, 241, 0.3);
+    }
+
+    .btn-complete {
+        background: rgba(34, 197, 94, 0.2);
+        color: #86efac;
+        border: 1px solid rgba(34, 197, 94, 0.3);
+    }
+
+    .btn-complete:hover {
+        background: rgba(34, 197, 94, 0.3);
+    }
+
+    /* ===== COMPLETED TIMELINE ===== */
+    .completed-timeline {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .completed-item {
+        display: flex;
+        gap: 12px;
+        align-items: flex-start;
+        background: rgba(255,255,255,0.02);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 12px;
+        padding: 12px;
+    }
+
+    .checkmark {
+        font-size: 20px;
+        color: #34d399;
+        flex-shrink: 0;
+        margin-top: 2px;
+    }
+
+    .completed-info p {
+        margin: 4px 0;
+    }
+
+    .completed-info p:first-child {
+        font-weight: 600;
+        color: #fff;
+        font-size: 14px;
+    }
+
+    .completed-date {
+        font-size: 12px;
+        color: rgba(255,255,255,0.5);
+    }
+
+    .completed-amount {
+        font-size: 13px;
+        color: rgba(255,255,255,0.6);
+        font-weight: 500;
+    }
+
+    /* ===== EMPTY STATE ===== */
+    .empty-state {
+        background: rgba(255,255,255,0.02);
+        border: 1px dashed rgba(255,255,255,0.1);
+        border-radius: 14px;
+        padding: 40px 20px;
+        text-align: center;
+        color: rgba(255,255,255,0.5);
+    }
+
+    .empty-state p {
+        margin: 8px 0;
+    }
+
+    /* ===== HEADER ===== */
+    .page-header {
+        margin-bottom: 32px;
+    }
+
+    .page-header h2 {
+        font-size: 32px;
+        font-weight: 700;
+        color: #fff;
+        margin: 0;
+    }
+
+    .page-copy {
+        color: rgba(255,255,255,0.5);
+        font-size: 14px;
+        margin-top: 8px;
+    }
+
+    .action-btn {
+        padding: 10px 20px;
+        border-radius: 8px;
+        font-size: 13px;
+        font-weight: 600;
+        background: linear-gradient(135deg, #34d399, #22c55e);
+        color: #fff;
+        border: none;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-block;
+        transition: all 0.2s;
+    }
+
+    .action-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 0 20px rgba(34, 197, 94, 0.3);
+    }
+
+    @media (max-width: 768px) {
+        .goals-dashboard {
+            grid-template-columns: 1fr;
+        }
+
+        .goal-header {
+            flex-direction: column;
+        }
+
+        .completed-item {
+            padding: 10px;
+        }
+    }
+
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- HEADER -->
+<div class="page-header">
+    <h2> Financial Goals</h2>
+    
+</div>
+
+<!-- DASHBOARD -->
+{% if active_goals or completed_goals %}
+
+    <div class="goals-dashboard">
+
+        <!-- LEFT COLUMN: ACTIVE GOALS -->
+        <div class="goals-column">
+            
+
+            {% if active_goals %}
+                {% for item in active_goals %}
+                    <div class="goal-card" data-goal-id="{{ item.goal.id }}">
+                        <!-- Header -->
+                        <div class="goal-header">
+                            <div>
+                                <h4 style="margin-bottom: 10px;">{{ item.goal.name }}</h4>
+                                <div></div>
+                                <div></div>
+                                <div></div>
+                                <span class="priority-badge">Priority {{ item.goal.priority }}/10</span>
+                            </div>
+                        </div>
+
+                        <!-- Deadline -->
+                        <p class="deadline">
+                            📅 Deadline: <strong>{{ item.goal.deadline|date:"M d, Y" }}</strong>
+                            {% if item.goal.original_deadline and item.goal.original_deadline != item.goal.deadline %}
+                                <br><span style="font-size:12px;color:rgba(255,165,0,0.9);">⏱️ Adjusted from {{ item.goal.original_deadline|date:"M d, Y" }}</span>
+                            {% endif %}
+                        </p>
+
+                        <!-- Progress -->
+                        <div>
+                            {% widthratio item.goal.amount_saved item.goal.target_amount 100 as progress %}
+                            <div class="progress-fill" style="width: {{ progress }}%"></div>
+                        </div>
+                        <p class="progress-text">₹{{ item.goal.amount_saved|floatformat:0 }} / ₹{{ item.goal.target_amount|floatformat:0 }}</p>
+
+                        <!-- Financial Analysis -->
+                        <div class="analysis-box">
+                            
+                            <div class="analysis-row">
+                                <span class="analysis-label">📈 Projected at deadline:</span>
+                                <span class="analysis-value">₹{{ item.analysis.projected_balance_at_deadline|floatformat:0 }}</span>
+                            </div>
+                            <div class="analysis-row">
+                                <span class="analysis-label">📊 Monthly savings needed:</span>
+                                <span class="analysis-value">₹{{ item.analysis.required_monthly_savings|floatformat:0 }}</span>
+                            </div>
+                            <div class="analysis-row">
+                                <span class="analysis-label">💵 Your monthly savings:</span>
+                                <span class="analysis-value">₹{{ item.analysis.actual_monthly_savings|floatformat:0 }}</span>
+                            </div>
+                        </div>
+
+                        <!-- Status -->
+                        {% if item.analysis.is_feasible %}
+                            <span class="status-badge feasible">✓ Feasible</span>
+                        {% else %}
+                            <span class="status-badge not-feasible">⚠ Not Feasible</span>
+
+                            <!-- AI Suggestion -->
+                            {% if item.analysis.shift_suggestion %}
+                                <div class="ai-suggestion">
+                                    <div class="suggestion-title">💡 Smart Deadline Adjustment</div>
+                                    <div class="suggestion-detail">
+                                        <p><strong>Goal is not feasible</strong> at the current deadline</p>
+                                        <p style="margin-top: 8px; color: rgba(255,255,255,0.7); font-size: 12px;">
+                                            You can save ₹{{ item.analysis.actual_monthly_savings|floatformat:0 }}/month, but this goal requires ₹{{ item.analysis.required_monthly_savings|floatformat:0 }}/month
+                                        </p>
+                                    </div>
+                                    <p style="margin: 12px 0 8px 0;"><strong>📅 Recommended new deadline: {{ item.analysis.shift_suggestion.new_deadline|date:"M d, Y" }}</strong></p>
+                                    <p style="font-size: 12px; color: rgba(255,255,255,0.6); margin: 6px 0;">{{ item.analysis.shift_suggestion.reason }}</p>
+                                    <div class="suggestion-buttons">
+                                        <button class="btn-small btn-accept" onclick="confirmShift({{ item.goal.id }}, '{{ item.analysis.shift_suggestion.new_deadline|date:"Y-m-d" }}')">
+                                            ✓ Accept & Optimize
+                                        </button>
+                                        <button class="btn-small btn-reject" onclick="rejectShift({{ item.goal.id }})">
+                                            ✗ Keep as Is
+                                        </button>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        {% endif %}
+
+                        <!-- Actions -->
+                        <div class="goal-actions">
+                            <a href="/goals/{{ item.goal.id }}/edit/" class="btn-edit">📝 Edit</a>
+                            <button class="btn-complete" onclick="markAchieved({{ item.goal.id }})">✓ Mark Complete</button>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <p>No active goals yet</p>
+                    <p>Create your first goal to get started!</p>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- RIGHT COLUMN: COMPLETED GOALS -->
+        <div class="goals-column">
+            <div class="column-title">✅ Completed Goals</div>
+
+            {% if completed_goals %}
+                <div class="completed-timeline">
+                    {% for goal in completed_goals %}
+                        <div class="completed-item">
+                            <div class="checkmark">✓</div>
+                            <div class="completed-info">
+                                <p>{{ goal.name }}</p>
+                                <p class="completed-date">Completed on {{ goal.created_at|date:"M d, Y" }}</p>
+                                <p class="completed-amount">₹{{ goal.target_amount|floatformat:0 }} saved</p>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <p>No completed goals yet</p>
+                    <p>Keep working towards your goals!</p>
+                </div>
+            {% endif %}
+        </div>
+
+    </div>
+
+{% else %}
+
+    <!-- NO GOALS AT ALL -->
+    <div class="empty-state" style="padding: 80px 40px; text-align: center;">
+        <p style="font-size: 24px; margin-bottom: 16px;">🎯</p>
+        <h3 style="font-size: 20px; color: #fff; margin-bottom: 8px;">No goals yet</h3>
+        <p>Create your first goal to start your journey towards financial success!</p>
+        <a href="/goals/add/" class="action-btn" style="margin-top: 20px;">+ Create Goal</a>
+    </div>
+
+{% endif %}
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+
+function confirmShift(goalId, newDeadline) {
+    const newDate = new Date(newDeadline);
+    const confirmMsg = `Shift this goal deadline to ${newDate.toLocaleDateString()}?\n\nPriority-based optimization will apply this change along with any necessary adjustments to other goals.`;
+
+    if (confirm(confirmMsg)) {
+        console.log(`Shifting goal ${goalId} to ${newDeadline}`);
+
+        // Show loading state
+        const btn = event.target;
+        const originalText = btn.innerText;
+        btn.innerText = '⏳ Updating...';
+        btn.disabled = true;
+
+        fetch(`/goals/${goalId}/confirm-shift/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            },
+            body: JSON.stringify({new_deadline: newDeadline})
+        })
+        .then(r => {
+            console.log(`Response status: ${r.status}`);
+            if (!r.ok) throw new Error(`HTTP ${r.status}`);
+            return r.json();
+        })
+        .then(data => {
+            console.log('Response data:', data);
+            if (data.success) {
+                alert(`Success! Goal deadline updated to ${newDate.toLocaleDateString()}\n\nReloading dashboard...`);
+                setTimeout(() => {
+                    location.reload();
+                }, 800);
+            } else {
+                throw new Error(data.error || 'Unknown error from server');
+            }
+        })
+        .catch(err => {
+            console.error('Error:', err);
+            btn.innerText = originalText;
+            btn.disabled = false;
+            alert(`Error updating goal:\n${err.message}\n\nPlease try again or contact support.`);
+        });
+    }
+}
+
+function rejectShift(goalId) {
+    const suggestionBox = document.querySelector(`[data-goal-id="${goalId}"] .ai-suggestion`);
+    if (suggestionBox) {
+        suggestionBox.style.display = 'none';
+        console.log(`Shift suggestion rejected for goal ${goalId}`);
+    }
+}
+
+function markAchieved(goalId) {
+    if (confirm('Mark this goal as achieved?')) {
+        const btn = event.target;
+        const originalText = btn.innerText;
+        btn.innerText = '⏳ Marking...';
+        btn.disabled = true;
+
+        fetch(`/goals/${goalId}/mark-achieved/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': getCookie('csrftoken')
+            }
+        })
+        .then(r => {
+            if (!r.ok) throw new Error(`HTTP ${r.status}`);
+            return r.json();
+        })
+        .then(data => {
+            if (data.success) {
+                alert('Congratulations! Goal marked as completed!\n\nReloading dashboard...');
+                setTimeout(() => {
+                    location.reload();
+                }, 800);
+            } else {
+                throw new Error(data.error || 'Unknown error');
+            }
+        })
+        .catch(err => {
+            console.error('Error:', err);
+            btn.innerText = originalText;
+            btn.disabled = false;
+            alert(`Error marking goal as complete:\n${err.message}`);
+        });
+    }
+}
+
+function optimizeGoalsByPriority() {
+    const confirmMsg = `This will intelligently reorder your goals based on priority:\n
+- Highest priority goals stay at their current deadline (if feasible)
+- Lower priority goals are shifted to ensure ALL goals are achievable
+
+Continue?`;
+
+    if (confirm(confirmMsg)) {
+        console.log('[OPTIMIZE] Starting goal optimization...');
+
+        // Disable button and show loading
+        const btn = event.target;
+        const originalText = btn.innerText;
+        btn.innerText = '⏳ Optimizing...';
+        btn.disabled = true;
+
+        // Make sure CSRF token is present
+        const csrfToken = getCookie('csrftoken');
+        console.log(`[OPTIMIZE] CSRF token: ${csrfToken ? 'present' : 'MISSING'}`);
+
+        fetch('/goals/api/optimize-by-priority/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrfToken || ''
+            },
+            credentials: 'same-origin'
+        })
+        .then(r => {
+            console.log(`[OPTIMIZE] HTTP ${r.status}`);
+            if (!r.ok) {
+                return r.json().then(data => {
+                    throw new Error(data.error || `HTTP ${r.status}`);
+                });
+            }
+            return r.json();
+        })
+        .then(data => {
+            console.log('[OPTIMIZE] Response:', data);
+
+            if (data.success) {
+                if (!data.results || data.results.length === 0) {
+                    alert('All goals are already optimized!\n\nNo changes needed - your goals are feasible at their current deadlines.');
+                    location.reload();
+                    return;
+                }
+
+                let summary = `Successfully optimized ${data.results.length} goal(s):\n\n`;
+                let changesCount = 0;
+
+                data.results.forEach(r => {
+                    if (r.months_shifted && r.months_shifted !== 0) {
+                        summary += `• ${r.goal_name}: Shifted by ${Math.abs(r.months_shifted)} month(s)\n`;
+                        changesCount++;
+                    } else {
+                        summary += `• ${r.goal_name}: Already optimal\n`;
+                    }
+                });
+
+                if (changesCount === 0) {
+                    summary = `All goals are already optimized!\n\nNo deadline changes needed.`;
+                } else {
+                    summary += `\nShifted ${changesCount} goal(s) for optimal prioritization.`;
+                }
+
+                summary += `\n\nReloading dashboard...`;
+                alert(summary);
+
+                setTimeout(() => {
+                    console.log('[OPTIMIZE] Reloading page...');
+                    location.reload();
+                }, 500);
+            } else {
+                throw new Error(data.error || 'Optimization failed');
+            }
+        })
+        .catch(err => {
+            console.error('[OPTIMIZE] ERROR:', err);
+            btn.innerText = originalText;
+            btn.disabled = false;
+            alert(`Error optimizing goals:\n${err.message}\n\nCheck the browser console (F12) for details.`);
+        });
+    }
+}
+</script>
+{% endblock %}

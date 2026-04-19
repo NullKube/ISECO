@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block title %}Group Invitation — ISECO{% endblock %}
+{% block page_heading %}Group Invitation{% endblock %}
+{% block page_subtitle %}Accept or decline the invitation to join {{ invite.group.name }}.{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <p class="eyebrow">Groups</p>
+        <h2>Invitation to {{ invite.group.name }}</h2>
+        <p class="page-copy">Review the invite details and update your group membership.</p>
+    </div>
+    <a href="/notifications/list/" class="action-btn action-outline">Back to alerts</a>
+</div>
+
+<div class="card section-card">
+    <div class="list-card">
+        <article class="list-item">
+            <div class="list-item-title">
+                <h3>Invitation status</h3>
+            </div>
+            <div class="list-item-meta">Status: {{ invite.status|capfirst }}</div>
+            <div class="list-item-meta">Sent by: {{ invite.sender.username }}</div>
+            <div class="list-item-meta">Received by: {{ invite.receiver.username }}</div>
+            <div class="list-item-meta">Created at: {{ invite.created_at }}</div>
+        </article>
+        <article class="list-item">
+            <div class="list-item-meta"><strong>Group:</strong> {{ invite.group.name }}</div>
+        </article>
+    </div>
+
+    {% if message %}
+    <div class="notification notification-success" style="margin-top: 16px;">{{ message }}</div>
+    {% endif %}
+
+    {% if invite.status == "pending" %}
+    <form method="POST" class="form-grid" style="margin-top: 24px;">
+        {% csrf_token %}
+        <div class="button-row">
+            <button class="action-btn action-purple" type="submit" name="action" value="accept">Accept invite</button>
+            <button class="action-btn action-outline" type="submit" name="action" value="decline">Decline invite</button>
+        </div>
+    </form>
+    {% endif %}
+</div>
+{% endblock %}

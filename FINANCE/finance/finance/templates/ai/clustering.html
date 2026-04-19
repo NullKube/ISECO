@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block title %}Spending Clusters - ISECO{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <a href="/ai/engine/" class="back-link">&larr; Back to AI Engine</a>
+    <h1>Spending Pattern Analysis</h1>
+    <p>ML-powered clustering of your expenses (Method: {{ method }})</p>
+</div>
+
+<div class="grid grid-3">
+    {% for cluster_name, cluster_data in clusters.items %}
+    <div class="card">
+        <h2>{{ cluster_name }}</h2>
+
+        {% if cluster_data.type %}
+        <span class="badge badge-info">{{ cluster_data.type }}</span>
+        {% endif %}
+
+        <div style="margin-top: 1rem;">
+            <div class="stat-card" style="padding: 0.5rem;">
+                <div class="stat-value" style="font-size: 1.5rem;">{{ cluster_data.count|default:0 }}</div>
+                <div class="stat-label">Transactions</div>
+            </div>
+        </div>
+
+        {% if cluster_data.total_amount %}
+        <p style="margin-top: 1rem;">
+            <strong>Total:</strong> ₹{{ cluster_data.total_amount|floatformat:0 }}
+        </p>
+        {% endif %}
+
+        {% if cluster_data.avg_amount %}
+        <p>
+            <strong>Avg:</strong> ₹{{ cluster_data.avg_amount|floatformat:0 }}
+        </p>
+        {% endif %}
+
+        {% if cluster_data.insight %}
+        <div class="ai-box" style="margin-top: 1rem; padding: 0.75rem;">
+            <small>{{ cluster_data.insight }}</small>
+        </div>
+        {% endif %}
+
+        {% if cluster_data.expenses %}
+        <div style="margin-top: 1rem;">
+            <h3>Sample Transactions</h3>
+            <ul class="styled" style="font-size: 0.875rem;">
+                {% for expense in cluster_data.expenses %}
+                <li>
+                    {{ expense.category|default:"Uncategorized" }}: ₹{{ expense.amount|floatformat:0 }}
+                    <br><small style="color: var(--text-muted);">{{ expense.date }}</small>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+    </div>
+    {% empty %}
+    <div class="card">
+        <p>No clustering data available. Add more expenses to see patterns.</p>
+    </div>
+    {% endfor %}
+</div>
+
+<div class="card" style="margin-top: 1.5rem; text-align: center;">
+    <a href="/ai/insights/" class="btn btn-primary">View Behavioral Insights &rarr;</a>
+</div>
+{% endblock %}

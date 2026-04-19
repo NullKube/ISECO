@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block title %}Groups - ISECO{% endblock %}
+{% block page_heading %}Groups{% endblock %}
+{% block page_subtitle %}Manage shared budgets, members and group expenses in one polished workspace.{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div>
+        <p class="eyebrow">Groups</p>
+        <h2>Community finance</h2>
+        <p class="page-copy">See group workspaces, invite members, and review shared spending.</p>
+    </div>
+    <a href="/groups/create/" class="action-btn action-purple">Create new group</a>
+</div>
+
+{% if groups %}
+<div class="list-card">
+    {% for group in groups %}
+    <article class="list-item">
+        <div class="list-item-title">
+            <h3>{{ group.name }}</h3>
+            <a href="/groups/{{ group.id }}/view/" class="action-btn action-outline">Open</a>
+        </div>
+        <p class="list-item-meta">{{ group.members|length }} members · {{ group.expenses|length }} shared expenses</p>
+    </article>
+    {% endfor %}
+</div>
+{% else %}
+<div class="empty-state">
+    No groups created yet. Start a new shared wallet or budget group.
+</div>
+{% endif %}
+{% endblock %}

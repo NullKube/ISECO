@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+
+{% block title %}Add Group Expense — ISECO{% endblock %}
+{% block page_heading %}Add Group Expense{% endblock %}
+{% block page_subtitle %}Submit a group transaction using the dashboard-style form layout.{% endblock %}
+
+{% block content %}
+<div class="card form-card">
+    <form method="POST" class="form-grid">
+        {% csrf_token %}
+        <div class="form-group"><label class="form-label">Group ID</label><input class="form-input" type="number" name="group" required></div>
+        <div class="form-group"><label class="form-label">User ID</label><input class="form-input" type="number" name="user" required></div>
+        <div class="form-group"><label class="form-label">Amount</label><input class="form-input" type="number" name="amount" step="0.01" required></div>
+        <div class="form-group"><label class="form-label">Description</label><input class="form-input" type="text" name="description" required></div>
+        <div class="form-group"><label class="form-label">Date</label><input class="form-input" type="date" name="date" required></div>
+        <div class="button-row"><button class="action-btn action-amber" type="submit">Add Expense</button><a class="action-btn action-outline" href="/groups/list/">Cancel</a></div>
+    </form>
+</div>
+{% endblock %}

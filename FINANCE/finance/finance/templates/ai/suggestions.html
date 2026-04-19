@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}Smart Suggestions - ISECO{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <a href="/ai/engine/" class="back-link">&larr; Back to AI Engine</a>
+    <h1>Smart Suggestions</h1>
+    <p>Personalized recommendations to optimize your finances</p>
+</div>
+
+{% if ai_explanation %}
+<div class="ai-box">
+    <h3>AI Explanation</h3>
+    <p>{{ ai_explanation }}</p>
+</div>
+{% endif %}
+
+<div class="card">
+    <h2>Your Suggestions</h2>
+    <ul class="styled">
+        {% for suggestion in suggestions %}
+        <li>
+            <div style="padding: 1rem 0;">
+                {{ suggestion }}
+            </div>
+        </li>
+        {% empty %}
+        <li>No suggestions available. Add expenses and goals to get personalized advice.</li>
+        {% endfor %}
+    </ul>
+</div>
+
+<div class="grid grid-3" style="margin-top: 1.5rem;">
+    <div class="card" style="text-align: center;">
+        <h3>Related Tools</h3>
+        <div style="display: flex; flex-direction: column; gap: 0.5rem; margin-top: 1rem;">
+            <a href="/ai/strategy/" class="btn btn-outline">Monthly Strategy</a>
+            <a href="/ai/insights/" class="btn btn-outline">Behavioral Insights</a>
+            <a href="/ai/overspending/" class="btn btn-outline">Overspending Check</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

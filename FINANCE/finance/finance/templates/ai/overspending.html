@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block title %}Overspending Alerts - ISECO{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <a href="/ai/engine/" class="back-link">&larr; Back to AI Engine</a>
+    <h1>Overspending Alerts</h1>
+    <p>Monitor unusual spending patterns and category overruns</p>
+</div>
+
+<div class="grid grid-2">
+    <div>
+        <div class="card">
+            <h2>Alert Summary</h2>
+            {% with critical_count=alerts|length %}
+            <div class="stat-card">
+                <div class="stat-value">{{ critical_count }}</div>
+                <div class="stat-label">Active Alerts</div>
+            </div>
+            {% endwith %}
+        </div>
+    </div>
+    {% if ai_explanation %}
+    <div>
+        <div class="ai-box">
+            <h3>AI Analysis</h3>
+            <p>{{ ai_explanation }}</p>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<div class="card">
+    <h2>Alert Details</h2>
+    {% for alert in alerts %}
+    <div
+        class="alert alert-{% if alert.type == 'critical' %}critical{% elif alert.type == 'warning' %}warning{% elif alert.type == 'success' %}success{% else %}info{% endif %}">
+        <strong>{{ alert.category }}</strong>
+        {% if alert.amount_over > 0 %}
+        <span
+            class="badge badge-{% if alert.type == 'critical' %}danger{% elif alert.type == 'warning' %}warning{% else %}info{% endif %}"
+            style="float: right;">
+            Over by ₹{{ alert.amount_over|floatformat:0 }}
+        </span>
+        {% endif %}
+        <p style="margin-top: 0.5rem;">{{ alert.message }}</p>
+        {% if alert.period %}
+        <small style="color: var(--text-muted);">Period: {{ alert.period }}</small>
+        {% endif %}
+    </div>
+    {% empty %}
+    <p>No alerts at this time.</p>
+    {% endfor %}
+</div>
+
+<div class="card" style="text-align: center;">
+    <a href="/ai/alerts/" class="btn btn-primary">View All Alerts &rarr;</a>
+</div>
+{% endblock %}
