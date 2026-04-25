@@ -10,14 +10,25 @@ An advanced Django-based financial management system powered by AI, designed to 
 - Flexible filtering and search capabilities
 - Transaction history and reporting
 
-### AI-Powered Financial Intelligence
-- **Smart Forecasting**: ML-based predictions of future savings and spending patterns
-- **Goal Feasibility Analysis**: Intelligent analysis of whether financial goals are achievable
-- **Spending Optimization**: Priority-based budget allocation across multiple goals
-- **Overspending Detection**: Automatic alerts for spending anomalies
-- **Smart Suggestions**: Personalized recommendations for spending improvements
-- **Spending Clustering**: Categorize and identify spending patterns through machine learning
-- **Monthly Strategy Generation**: AI-generated monthly financial strategies
+### 🤖 AI-Powered Intelligence (Ollama LLM 3.2)
+**Advanced Natural Language Processing with Llama 3.2 Large Language Model**
+- **Intelligent Financial Insights**: LLM-generated contextual analysis of financial situations
+- **Natural Language Suggestions**: AI-generated recommendations in conversational format
+- **Smart Explanations**: Complex financial concepts explained in user-friendly language
+- **Context-Aware Guidance**: Personalized financial advice based on individual spending patterns
+- **Dynamic Strategy Generation**: AI-crafted monthly strategies with reasoning and rationale
+- **Anomaly Explanation**: Natural language explanation of unusual spending patterns
+- **Goal Advisory**: Intelligent counseling on goal feasibility and alternative approaches
+
+### 🧠 Machine Learning Analytics & Optimization
+**Powered by scikit-learn, NumPy, and SciPy**
+- **Smart Forecasting**: Advanced ML models for predicting future savings and spending trends
+- **Goal Feasibility Analysis**: Statistical analysis of whether financial goals are mathematically achievable
+- **Spending Optimization**: Intelligent budget allocation using priority and constraint-based optimization
+- **Overspending Detection**: ML-based anomaly detection for unusual spending patterns
+- **Spending Clustering**: Unsupervised learning to identify and categorize spending patterns
+- **Trend Analysis**: Statistical analysis of spending trends over time
+- **Predictive Modeling**: Regression models for accurate savings forecasting
 
 ### Goal Management
 - Create and track financial goals with deadlines
@@ -104,6 +115,26 @@ Notification system for alerts, milestones, and important financial events.
 - Python 3.12+
 - pip or conda
 - Virtual environment (recommended)
+- **Ollama** (for LLM AI features) - [Download Ollama](https://ollama.ai)
+- **Llama 3.2 model** (pulled automatically by Ollama)
+
+### Setup Ollama & Llama 3.2
+
+1. **Download and Install Ollama**
+   - Visit [https://ollama.ai](https://ollama.ai)
+   - Install for your OS (Windows, Mac, Linux)
+
+2. **Pull Llama 3.2 Model**
+   ```bash
+   ollama pull llama3.2
+   ```
+
+3. **Start Ollama Server** (runs in background)
+   ```bash
+   ollama serve
+   ```
+   
+   Verify it's running at `http://localhost:11434/api/tags`
 
 ### Installation
 
@@ -166,46 +197,130 @@ All endpoints follow REST principles through Django REST Framework:
 | Groups | `/groups/` |
 | Notifications | `/notifications/` |
 
-## 🤖 AI Engine Capabilities
+## 🤖 AI Engine Architecture
 
-The AI Engine provides intelligent financial analysis:
+The AI Engine is a hybrid system combining **Large Language Models (LLM)** and **Machine Learning**:
+
+### LLM Integration: Ollama Llama 3.2
+**Advanced conversational AI for financial guidance**
+- **Model**: Llama 3.2 (via Ollama framework)
+- **Capabilities**:
+  - Generates natural language financial advice and explanations
+  - Creates context-aware insights from numerical data
+  - Provides conversational guidance on financial decisions
+  - Explains complex financial scenarios in user-friendly terms
+  - Preloaded in memory for instant response times (no cold starts)
+- **Host**: localhost:11434 (Ollama server)
+- **Optimization**: Model kept in memory permanently with `keep_alive: -1`
+
+### Machine Learning Modules
+**Statistical and predictive analysis for financial patterns**
+
+| Module | Purpose | ML Techniques |
+|--------|---------|----------------|
+| `forecast.py` | Savings & spending prediction | Regression, time-series analysis |
+| `feasibility.py` | Goal achievability assessment | Constraint satisfaction, scheduling |
+| `optimizer.py` | Budget allocation optimization | Linear programming, priority sorting |
+| `clustering.py` | Spending pattern identification | K-means clustering, unsupervised learning |
+| `overspending.py` | Anomaly detection | Statistical outlier detection |
+| `insights.py` | Pattern extraction | Data mining, aggregation |
+| `strategy.py` | Strategic planning | Multi-objective optimization |
 
 ### Master AI Output
-Combined analysis across all AI modules:
-- Savings forecasting
-- Goal feasibility assessment
-- Budget allocation
-- Spending insights
-- Overspending alerts
-- Smart suggestions
-- Monthly strategies
+Unified analysis orchestrating both AI and ML:
+- **LLM-Generated Insights**: Conversational explanations of financial situations
+- **ML Predictions**: Savings forecasting and spending trends
+- **Feasibility Assessment**: Statistical goal analysis with LLM explanations
+- **Smart Recommendations**: ML-identified opportunities, LLM-explained
+- **Budget Allocation**: Optimized distribution with reasoning
+- **Anomaly Alerts**: Detected patterns with natural language summaries
+- **Monthly Strategy**: Data-driven recommendations in natural language
 
-### Key Features
-- **User-specific Analysis**: All AI outputs are filtered for individual users
-- **Error Handling**: Graceful error management throughout
-- **Performance Optimization**: Results caching to prevent redundant computation
+### Architecture Benefits
+- **User-specific Analysis**: All AI outputs filtered for individual users
+- **Error Handling**: Graceful error management throughout both systems
+- **Performance Optimization**: Results caching + model preloading for speed
 - **Multi-goal Support**: Analyzes multiple goals simultaneously
+- **Explainability**: ML decisions explained via LLM for transparency
+- **Scalability**: Both LLM and ML components run efficiently
 
 ## 📊 Technologies Used
 
-- **Backend**: Django 5.2.8
-- **API**: Django REST Framework 3.16.1
-- **Machine Learning**: scikit-learn, NumPy, SciPy
-- **Database**: SQLite3 (development), supports PostgreSQL for production
-- **Environment Management**: Python venv
+### Core Backend
+- **Web Framework**: Django 5.2.8
+- **REST API**: Django REST Framework 3.16.1
+- **Database**: SQLite3 (development), PostgreSQL (production-ready)
+
+### 🤖 Artificial Intelligence & Machine Learning
+**LLM (Large Language Model)**
+- **Ollama Framework**: Open-source LLM orchestration
+- **Model**: Llama 3.2 (state-of-the-art conversational AI)
+- **Use Cases**: Natural language insights, financial guidance, strategy explanation
+
+**ML (Machine Learning)**
+- **scikit-learn**: Classification, clustering, optimization algorithms
+- **NumPy 2.3.5**: Numerical computing and array operations
+- **SciPy 1.16.3**: Scientific computing and statistical analysis
+- **Use Cases**: Forecasting, anomaly detection, pattern clustering, feasibility analysis
+
+### Date Handling
+- **python-dateutil 2.9.0**: Advanced date manipulation and timezone handling
 
 ## 📦 Key Dependencies
 
+### Web & API Framework
 | Package | Version | Purpose |
 |---------|---------|---------|
 | Django | 5.2.8 | Web framework |
-| djangorestframework | 3.16.1 | REST API |
-| numpy | 2.3.5 | Numerical computing |
-| scikit-learn | 1.7.2 | Machine learning |
-| scipy | 1.16.3 | Scientific computing |
-| python-dateutil | 2.9.0 | Date utilities |
+| djangorestframework | 3.16.1 | REST API framework |
+
+### 🤖 AI & Machine Learning
+| Package | Version | Purpose |
+|---------|---------|---------|
+| **Ollama** | Latest | LLM orchestration & Llama 3.2 model serving |
+| **scikit-learn** | 1.7.2 | Machine learning (clustering, optimization, prediction) |
+| **NumPy** | 2.3.5 | Numerical computing & array operations |
+| **SciPy** | 1.16.3 | Scientific computing & statistical analysis |
+
+### Utilities
+| Package | Version | Purpose |
+|---------|---------|---------|
+| python-dateutil | 2.9.0 | Date/time utilities |
 
 ## 🛠️ Development
+
+### Ensure AI Engine is Ready
+
+Before using AI features, initialize the Ollama engine:
+
+```python
+# In your Django views or management commands
+from ai_engine.ollama_runner import ensure_ollama_running
+
+ensure_ollama_running()  # Starts Ollama, preloads Llama 3.2, eliminates cold starts
+```
+
+### Using the Master AI Engine
+
+```python
+from ai_engine.engine import master_ai_output
+
+# Get comprehensive AI analysis for a user
+user = User.objects.get(id=1)
+ai_analysis = master_ai_output(user=user)
+
+# Returns:
+# {
+#     'forecast': {...},  # ML-predicted savings
+#     'monthly_averages': {...},  # Historical analysis
+#     'goal_analysis': [...],  # Goal feasibility + LLM explanations
+#     'allocations': {...},  # Optimized budget distribution
+#     'suggestions': [...],  # LLM-generated recommendations
+#     'overspending': [...],  # ML-detected anomalies + LLM context
+#     'insights': {...},  # Pattern analysis + natural language summary
+#     'strategy': {...}  # Monthly strategy with reasoning
+# }
+```
 
 ### Database Migrations
 ```bash
@@ -277,6 +392,49 @@ Key settings in [finance/settings.py](finance/finance/settings.py):
 
 ISECO © 2026. All rights reserved.
 
+## � Troubleshooting AI Features
+
+### Ollama Issues
+
+**Ollama server not running**
+```bash
+# Check if Ollama is running
+curl http://localhost:11434/api/tags
+
+# If not running, start it
+ollama serve
+```
+
+**Model not found**
+```bash
+# Verify Llama 3.2 is installed
+ollama list
+
+# Pull the model if missing
+ollama pull llama3.2
+```
+
+**Cold start timeouts**
+- The `ensure_ollama_running()` function preloads the model into memory
+- Call it once at Django startup to eliminate delays
+- Model is kept in memory permanently with `keep_alive: -1`
+
+**Out of Memory (OOM)**
+- Llama 3.2 requires significant VRAM
+- Ensure your system has 8GB+ available RAM
+- Consider running on GPU-enabled hardware for better performance
+
+### ML Pipeline Issues
+
+**Forecasting errors**
+- Ensure users have at least 3 months of transaction history
+- Check that expense dates are properly formatted
+
+**Goal feasibility always false**
+- Verify monthly savings are positive
+- Check that goal deadlines are realistic
+- Review goal priority rankings
+
 ## 💬 Support
 
 For issues, feature requests, or questions about ISECO, please consult the project documentation or contact the development team.
@@ -284,3 +442,4 @@ For issues, feature requests, or questions about ISECO, please consult the proje
 ---
 
 **Status**: Active Development | **Last Updated**: April 2026
+**AI Model**: Ollama Llama 3.2 | **ML Stack**: scikit-learn, NumPy, SciPy
